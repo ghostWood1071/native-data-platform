@@ -11,26 +11,25 @@ I will ingest data from Postgres, store it in silver zone. Then I can make some 
 ## How to run?
 
     cd native-data-platform
-    setup.cmd
-    docker compose up -d
+    setup.cmd docker-compose-dev.yaml
+    run.cmd source2silver_customer
 after all container started, create bucket named "warehouse" in minio
 ## How to setup job?
 ### Ingestion job
  - create config file like the ./config/job/source2silver_order.json
  - create job file  ./jobs/source2silver_order.py     
- -  access spark driver container: docker exec -it -u root spark-driver /bin/bash
- - submit job: /opt/spark/bin/spark-submit --py-files /opt/spark/jobs/core.zip /opt/spark/jobs/source2silver_order.py
+ - run: run.cmd source2silver_order.py
 
 ### Aggregate job
 -  create config file like the ./config/job/silver2golden_top_user.json
 - create job file ./jobs/silver2golden_top_user.py
 - create transform file ./core/transformer/silver2golden_top_user.py
-- zip the "core" folder then copy the .zip to jobs folder
--  submit job: /opt/spark/bin/spark-submit --py-files /opt/spark/jobs/core.zip /opt/spark/jobs/silver2golden_top_user.py
+- zip the "src" folder then copy the .zip to infra/job-lib folder
+- run: run.cmd silver2golden_top_user.py
 
 ## Summary
-- The platform called native because it's easy to operate in both  on-premise and cloud environments. I deployed the same platform
+- The platform called native because it's easy to operate in both  on-premise and cloud environments. I deployed the same platform structure in previous projects
 - It's easy to debug because of using pyspark to transform
-- It's easy to scale, just config by json, duplicate it for the same job, same table
+- It's easy to scale, just config by json, duplicate it for the same type of job, same for the same table structure
 - It's easy to develop just inherit from base classes
 However, the limit of time, I can't deploy platform with orchestration. 

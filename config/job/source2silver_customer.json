@@ -1,5 +1,11 @@
 {
-    "extract_dfs": {
+    "job_id": "source2silver_customer",
+    "schedule": "",
+    "depend_on": "",
+    "run_mode": {
+        "name": "default"
+    },
+    "extract": {
         "customers": {
             "table": "public.customer",
             "url": "jdbc:postgresql://postgres-metastore:5432/retail",
@@ -8,24 +14,27 @@
                 "password": "etl",
                 "driver": "org.postgresql.Driver"
             },
-            "reader": "core.reader.jdbc_reader.JDBCReader"
+            "reader": "JDBCReader"
         }
     },
-    "transform_dfs": {
-        "customers": [
+    "transform": {
+        "transformer": "ConfigTransformer",
+        "transformation": {
+          "customers": [
             {
-                "op": "withColumn",
-                "args": {
-                    "colName": "partition_date",
-                    "col": "F.to_date(F.col('update_at'))"
-                }
+              "op": "withColumn",
+              "args": {
+                "colName": "partition_date",
+                "col": "F.to_date(F.col('update_at'))"
+              }
             }
-        ]
+          ]
+        }
     },
     "load": {
         "customers": {
             "table_name": "iceberg.silver.customer",
-            "writer": "core.writer.iceberg_writer.IcebergWriter",
+            "writer": "IcebergWriter",
             "mode": "overwrite",
             "format": "parquet",
             "partition_by": [

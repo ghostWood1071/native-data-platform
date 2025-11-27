@@ -1,0 +1,4 @@
+.idea
+infra/jars
+infra/minio-storage
+infra/pg-metastore-data

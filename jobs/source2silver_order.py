@@ -1,3 +1,6 @@
-from core.etl_base import run
+from src.core import runner
 
-run("/opt/spark/jobs/config/source2silver_order.json")
+runner.run(
+    "/opt/spark/platform-config/engine/spark-dev.json",
+    "/opt/spark/platform-config/job/source2silver_order.json"
+)

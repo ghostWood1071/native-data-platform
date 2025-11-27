@@ -19,11 +19,11 @@
         }
     },
     "transform": {
-      "transformer": "PyTransformer",
-      "transformation": "silver2golden_top_user.TransformSilver2GoldenToTopUser"
+      "transformer": "SQLTransformer",
+      "transformation": "/opt/spark/sql-job/silver2golden_top_user.sql"
     },
     "load": {
-        "top_user": {
+        "result": {
             "table_name": "iceberg.golden.top_user_completed_order_in_day",
             "writer": "IcebergWriter",
             "mode": "overwrite_partition",

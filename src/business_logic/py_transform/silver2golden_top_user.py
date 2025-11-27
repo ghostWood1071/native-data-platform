@@ -1,16 +1,13 @@
-from core.transformer.transform_base import TransformBase
-from pyspark.sql import functions as F, DataFrame
+from src.core.transformers import PyTransformer
+from pyspark.sql import functions as F
 from datetime import datetime
 
 """
 Generate a report showing the top 10 users who completed the most order payments in day.
 """
-
-
-class TransformSilver2GoldenToTopUser(TransformBase):
-    def prepare_order_df(self):
+class TransformSilver2GoldenToTopUser(PyTransformer):
+    def prepare_order_df(self, order_df):
         run_date = datetime.strptime(self.run_data_date, "%Y-%m-%d")
-        order_df = self.dfs.get("orders")
         order_df = (
             order_df.filter(
                 (F.col("updated_at") >= F.lit(run_date))
@@ -26,7 +23,7 @@ class TransformSilver2GoldenToTopUser(TransformBase):
 
     def transform(self):
         customer_df = self.dfs.get("customers")
-        order_df = self.prepare_order_df().cache()
+        order_df = self.prepare_order_df(self.dfs.get("orders")).cache()
         df_result = customer_df.alias("a").join(
             F.broadcast(order_df).alias("b"),
             on=F.col("a.id") == F.col("b.customer_id"),

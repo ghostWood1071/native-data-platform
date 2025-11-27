@@ -6,7 +6,7 @@ services:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - ./infra/minio-storage:/data
+      - ../../infra/minio-storage:/data
     environment:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: minio@123
@@ -23,8 +23,8 @@ services:
       POSTGRES_DB: metastore
       POSTGRES_HOST_AUTH_METHOD: password
     volumes:
-      - ./infra/postgres-init:/docker-entrypoint-initdb.d
-      - ./infra/pg-metastore-data:/var/lib/postgresql/data
+      - ../../infra/postgres-init:/docker-entrypoint-initdb.d
+      - ../../infra/pg-metastore-data:/var/lib/postgresql/data
     networks:
       - datanet
 
@@ -43,10 +43,10 @@ services:
       HIVE_METASTORE_DB_NAME: metastore
       DB_DRIVER: postgres
     volumes:
-      - ./infra/hive-conf:/opt/hive/conf
-      - ./infra/jars/postgresql-42.6.2.jar:/opt/hive/lib/postgresql-42.6.2.jar
-      - ./infra/jars/hadoop-aws-3.3.4.jar:/opt/hive/lib/hadoop-aws-3.3.4.jar
-      - ./infra/jars/aws-java-sdk-bundle-1.12.367.jar:/opt/hive/lib/aws-java-sdk-bundle-1.12.367.jar
+      - ../../infra/hive-conf:/opt/hive/conf
+      - ../../infra/jars/postgresql-42.6.2.jar:/opt/hive/lib/postgresql-42.6.2.jar
+      - ../../infra/jars/hadoop-aws-3.3.4.jar:/opt/hive/lib/hadoop-aws-3.3.4.jar
+      - ../../infra/jars/aws-java-sdk-bundle-1.12.367.jar:/opt/hive/lib/aws-java-sdk-bundle-1.12.367.jar
     ports:
       - "9083:9083"
     networks:
@@ -61,13 +61,15 @@ services:
       - SPARK_MASTER_CORES=1
       - SPARK_NO_DAEMONIZE=false
     volumes:
-      - ./infra/hive-conf/hive-site.xml:/opt/spark/conf/hive-site.xml
-      - ./infra/jars/postgresql-42.6.2.jar:/opt/spark/jars/postgresql-42.6.2.jar
-      - ./infra/jars/hadoop-aws-3.3.4.jar:/opt/spark/jars/hadoop-aws-3.3.4.jar
-      - ./infra/jars/aws-java-sdk-bundle-1.12.367.jar:/opt/spark/jars/aws-java-sdk-bundle-1.12.237.jar
-      - ./infra/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar:/opt/spark/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar
-      - ./jobs:/opt/spark/jobs
-      - ./config/job:/opt/spark/jobs/config
+      - ../../infra/hive-conf/hive-site.xml:/opt/spark/conf/hive-site.xml
+      - ../../infra/jars/postgresql-42.6.2.jar:/opt/spark/jars/postgresql-42.6.2.jar
+      - ../../infra/jars/hadoop-aws-3.3.4.jar:/opt/spark/jars/hadoop-aws-3.3.4.jar
+      - ../../infra/jars/aws-java-sdk-bundle-1.12.367.jar:/opt/spark/jars/aws-java-sdk-bundle-1.12.237.jar
+      - ../../infra/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar:/opt/spark/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar
+      - ../../jobs:/opt/spark/jobs
+      - ../../config:/opt/spark/platform-config
+      - ../../infra/job-lib:/opt/spark/job-lib
+      - ../../src/business_logic/sql_transform:/opt/spark/sql-job
     command: /opt/spark/sbin/start-master.sh
     depends_on:
       - hive-metastore
@@ -88,11 +90,11 @@ services:
       - SPARK_WORKER_CORES=1
       - SPARK_NO_DAEMONIZE=false
     volumes:
-      - ./infra/jars/postgresql-42.6.2.jar:/opt/spark/jars/postgresql-42.6.2.jar
-      - ./infra/hive-conf/hive-site.xml:/opt/spark/conf/hive-site.xml
-      - ./infra/jars/hadoop-aws-3.3.4.jar:/opt/spark/jars/hadoop-aws-3.3.4.jar
-      - ./infra/jars/aws-java-sdk-bundle-1.12.367.jar:/opt/spark/jars/aws-java-sdk-bundle-1.12.237.jar
-      - ./infra/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar:/opt/spark/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar
+      - ../../infra/jars/postgresql-42.6.2.jar:/opt/spark/jars/postgresql-42.6.2.jar
+      - ../../infra/hive-conf/hive-site.xml:/opt/spark/conf/hive-site.xml
+      - ../../infra/jars/hadoop-aws-3.3.4.jar:/opt/spark/jars/hadoop-aws-3.3.4.jar
+      - ../../infra/jars/aws-java-sdk-bundle-1.12.367.jar:/opt/spark/jars/aws-java-sdk-bundle-1.12.237.jar
+      - ../../infra/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar:/opt/spark/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar
     command: /opt/spark/sbin/start-worker.sh spark-master:7077
     depends_on:
       - spark-master

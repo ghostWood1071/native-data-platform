@@ -1,3 +1,6 @@
-from core.etl_base import run
+from src.core import runner
 
-run("/opt/spark/jobs/config/silver2golden_top_user.json")
+runner.run(
+    "/opt/spark/platform-config/engine/spark-dev.json",
+    "/opt/spark/platform-config/job/silver2golden_top_user.json"
+)

@@ -1,6 +1,17 @@
 from pyspark.sql import DataFrame
-from core.reader.base_reader import BaseReader
-from datetime import datetime
+from src.core.interfaces import BaseReader
+
+
+class IcebergReader(BaseReader):
+    def load(self) -> DataFrame:
+        table = self.config.get("table")
+        query = self.config.get("query")
+        df = None
+        if query:
+            df = self.spark.sql(query)
+        if not query:
+            df = self.spark.table(table)
+        return df
 
 
 class JDBCReader(BaseReader):
@@ -8,7 +19,6 @@ class JDBCReader(BaseReader):
         reader = (
             self.spark.read.format("jdbc")
             .option("url", self.config.get("url"))
-
         )
         if self.config.get("table"):
             reader = reader.option("dbtable", self.config["table"])
