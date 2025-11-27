@@ -1,0 +1,37 @@
+{
+    "extract_dfs": {
+        "customers": {
+            "table": "public.customer",
+            "url": "jdbc:postgresql://postgres-metastore:5432/retail",
+            "properties": {
+                "user": "etl",
+                "password": "etl",
+                "driver": "org.postgresql.Driver"
+            },
+            "reader": "core.reader.jdbc_reader.JDBCReader"
+        }
+    },
+    "transform_dfs": {
+        "customers": [
+            {
+                "op": "withColumn",
+                "args": {
+                    "colName": "partition_date",
+                    "col": "F.to_date(F.col('update_at'))"
+                }
+            }
+        ]
+    },
+    "load": {
+        "customers": {
+            "table_name": "iceberg.silver.customer",
+            "writer": "core.writer.iceberg_writer.IcebergWriter",
+            "mode": "overwrite",
+            "format": "parquet",
+            "partition_by": [
+                "partition_date"
+            ],
+            "path": "s3a://warehouse/silver/customer"
+        }
+    }
+}

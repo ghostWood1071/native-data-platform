@@ -1,0 +1,25 @@
+{
+    "extract_dfs": {
+        "customers": {
+            "table": "iceberg.silver.customer",
+            "reader": "core.reader.iceberg_reader.IcebergReader"
+        },
+        "orders": {
+            "table": "iceberg.silver.order",
+            "reader": "core.reader.iceberg_reader.IcebergReader"
+        }
+    },
+    "transform_dfs": "core.transformer.silver2golden_top_user.TransformSilver2GoldenToTopUser",
+    "load": {
+        "top_user": {
+            "table_name": "iceberg.golden.top_user_completed_order_in_day",
+            "writer": "core.writer.iceberg_writer.IcebergWriter",
+            "mode": "overwrite_partition",
+            "format": "parquet",
+            "partition_by": [
+                "partition_date"
+            ],
+            "path": "s3a://warehouse/silver/order"
+        }
+    }
+}

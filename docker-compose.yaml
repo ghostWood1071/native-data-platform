@@ -1,0 +1,105 @@
+services:
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./infra/minio-storage:/data
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio@123
+    command: server --console-address ":9001" /data
+    networks:
+      - datanet
+
+  postgres-metastore:
+    image: postgres:14
+    container_name: postgres-metastore
+    environment:
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hive
+      POSTGRES_DB: metastore
+      POSTGRES_HOST_AUTH_METHOD: password
+    volumes:
+      - ./infra/postgres-init:/docker-entrypoint-initdb.d
+      - ./infra/pg-metastore-data:/var/lib/postgresql/data
+    networks:
+      - datanet
+
+  hive-metastore:
+    image: apache/hive:4.0.0
+    container_name: hive-metastore
+    depends_on:
+      - postgres-metastore
+      - minio
+    environment:
+      SERVICE_NAME: metastore
+      HIVE_METASTORE_DB_TYPE: postgres
+      HIVE_METASTORE_USER: hive
+      HIVE_METASTORE_PASSWORD: hive
+      HIVE_METASTORE_DB_HOST: postgres-metastore
+      HIVE_METASTORE_DB_NAME: metastore
+      DB_DRIVER: postgres
+    volumes:
+      - ./infra/hive-conf:/opt/hive/conf
+      - ./infra/jars/postgresql-42.6.2.jar:/opt/hive/lib/postgresql-42.6.2.jar
+      - ./infra/jars/hadoop-aws-3.3.4.jar:/opt/hive/lib/hadoop-aws-3.3.4.jar
+      - ./infra/jars/aws-java-sdk-bundle-1.12.367.jar:/opt/hive/lib/aws-java-sdk-bundle-1.12.367.jar
+    ports:
+      - "9083:9083"
+    networks:
+      - datanet
+
+  spark-master:
+    image: spark:3.5.6-scala2.12-java11-python3-r-ubuntu
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+      - SPARK_MASTER_MEMORY=1G
+      - SPARK_MASTER_CORES=1
+      - SPARK_NO_DAEMONIZE=false
+    volumes:
+      - ./infra/hive-conf/hive-site.xml:/opt/spark/conf/hive-site.xml
+      - ./infra/jars/postgresql-42.6.2.jar:/opt/spark/jars/postgresql-42.6.2.jar
+      - ./infra/jars/hadoop-aws-3.3.4.jar:/opt/spark/jars/hadoop-aws-3.3.4.jar
+      - ./infra/jars/aws-java-sdk-bundle-1.12.367.jar:/opt/spark/jars/aws-java-sdk-bundle-1.12.237.jar
+      - ./infra/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar:/opt/spark/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar
+      - ./jobs:/opt/spark/jobs
+      - ./config/job:/opt/spark/jobs/config
+    command: /opt/spark/sbin/start-master.sh
+    depends_on:
+      - hive-metastore
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+      - "4040:4040"
+    networks:
+      - datanet
+
+  spark-worker:
+    image: spark:3.5.6-scala2.12-java11-python3-r-ubuntu
+    container_name: spark-worker
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_CORES=1
+      - SPARK_NO_DAEMONIZE=false
+    volumes:
+      - ./infra/jars/postgresql-42.6.2.jar:/opt/spark/jars/postgresql-42.6.2.jar
+      - ./infra/hive-conf/hive-site.xml:/opt/spark/conf/hive-site.xml
+      - ./infra/jars/hadoop-aws-3.3.4.jar:/opt/spark/jars/hadoop-aws-3.3.4.jar
+      - ./infra/jars/aws-java-sdk-bundle-1.12.367.jar:/opt/spark/jars/aws-java-sdk-bundle-1.12.237.jar
+      - ./infra/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar:/opt/spark/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar
+    command: /opt/spark/sbin/start-worker.sh spark-master:7077
+    depends_on:
+      - spark-master
+    ports:
+      - "8082:8081"
+    networks:
+      - datanet
+networks:
+  datanet:
+    driver: bridge

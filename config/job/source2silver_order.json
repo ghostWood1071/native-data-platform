@@ -1,0 +1,37 @@
+{
+    "extract_dfs": {
+        "customers": {
+            "url": "jdbc:postgresql://postgres-metastore:5432/retail",
+            "properties": {
+                "user": "etl",
+                "password": "etl",
+                "driver": "org.postgresql.Driver"
+            },
+            "reader": "core.reader.jdbc_reader.JDBCReader",
+            "query": "SELECT * FROM \"order\" WHERE updated_at >= (CURRENT_DATE - INTERVAL '1 day') AND created_at < CURRENT_DATE"
+        }
+    },
+    "transform_dfs": {
+        "customers": [
+            {
+                "op": "withColumn",
+                "args": {
+                    "colName": "partition_date",
+                    "col": "F.to_date(F.col('updated_at'))"
+                }
+            }
+        ]
+    },
+    "load": {
+        "customers": {
+            "table_name": "iceberg.silver.order",
+            "writer": "core.writer.iceberg_writer.IcebergWriter",
+            "mode": "append",
+            "format": "parquet",
+            "partition_by": [
+                "partition_date"
+            ],
+            "path": "s3a://warehouse/silver/order"
+        }
+    }
+}
