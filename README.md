@@ -1,8 +1,4 @@
 # Data Platform Demo
-Hi, I'm Thinh
-
-Because of some reason about security policies in my company, I can't share my Github.  So I created a demo data platform to demonstrate my skill.
-I created a metadata driven data platform. It has two main elements: execution engine and metadata. We edit the metadata, then the execution engine executes ETL tasks as we defined.
 
 ## Data architecture
 ![enter image description here](https://lh3.googleusercontent.com/pw/AP1GczOu-dWkZa4VL-CGduMzDZI_ueVlKrfnHuvYWsIQ_RtMje2_hcrn82-OHDJvbl1ul63EMhqFSfqHvN2cbKDMqvuBwUU4W8z90VVK43IMiq9iZlAd5rZbyyXEhPCRecpmTjT2eW0gzF67Ba6_f75lBmZW=w621-h281-s-no-gm?authuser=0)
@@ -32,4 +28,3 @@ after all container started, create bucket named "warehouse" in minio
 - It's easy to debug because of using pyspark to transform
 - It's easy to scale, just config by json, duplicate it for the same type of job, same for the same table structure
 - It's easy to develop just inherit from base classes
-However, the limit of time, I can't deploy platform with orchestration. 
