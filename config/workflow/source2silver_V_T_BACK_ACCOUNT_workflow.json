@@ -15,7 +15,7 @@
     {
       "task_id": "source2bronze_V_T_BACK_ACCOUNT",
       "task_type": "spark",
-      "conn_id": "k8s",
+      "conn_id": "spark_k8s",
       "task_params": {
         "application": "s3a://asset/spark-jobs/entry_point.py",
         "name": "source2bronze_V_T_BACK_ACCOUNT",
@@ -48,7 +48,7 @@
     {
       "task_id": "bronze2silver_V_T_BACK_ACCOUNT",
       "task_type": "spark",
-      "conn_id": "k8s",
+      "conn_id": "spark_k8s",
       "depend_on": ["source2bronze_V_T_BACK_ACCOUNT"],
       "task_params": {
         "application": "s3a://asset/spark-jobs/entry_point.py",
