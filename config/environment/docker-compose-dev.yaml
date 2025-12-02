@@ -14,6 +14,21 @@ services:
     networks:
       - datanet
 
+  oracledb:
+    image: gvenzl/oracle-free:latest
+    container_name: oracledb
+    environment:
+      ORACLE_PASSWORD: admin
+      ORACLE_DATABASE: tradingnkt
+      APP_USER: user
+      APP_USER_PASSWORD: user
+    volumes:
+      - ../../infra/oracledb-data:/opt/oracle/oradata
+    ports:
+      - "1521:1521"
+    networks:
+      - datanet
+
   postgres-metastore:
     image: postgres:14
     container_name: postgres-metastore
@@ -68,6 +83,9 @@ services:
       - ../../infra/jars/hadoop-aws-3.3.4.jar:/opt/spark/jars/hadoop-aws-3.3.4.jar
       - ../../infra/jars/aws-java-sdk-bundle-1.12.367.jar:/opt/spark/jars/aws-java-sdk-bundle-1.12.237.jar
       - ../../infra/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar:/opt/spark/jars/iceberg-spark-runtime-3.5_2.12-1.5.2.jar
+      - ../../infra/jars/delta-spark_2.12-3.1.0.jar:/opt/spark/jars/delta-spark_2.12-3.1.0.jar
+      - ../../infra/jars/delta-storage-3.1.0.jar:/opt/spark/jars/delta-storage-3.1.0.jar
+      - ../../infra/jars/ojdbc8.jar:/opt/spark/jars/ojdbc8.jar
       - ../../jobs:/opt/spark/jobs
       - ../../config:/opt/spark/platform-config
       - ../../infra/job-lib:/opt/spark/job-lib

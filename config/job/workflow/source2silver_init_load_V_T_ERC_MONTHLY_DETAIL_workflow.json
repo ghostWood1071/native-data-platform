@@ -1,0 +1,76 @@
+{
+  "dag_id": "source2silver_init_load_V_T_ERC_MONTHLY_DETAIL_workflow",
+  "description": "source -> bronze -> silver",
+  "schedule": "0 2 * * *",
+  "start_date": "2025-01-01 00:00:00",
+  "active": true,
+  "tags": ["source2bronze", "bronze2silver"],
+  "default_args": {
+    "owner": "cmc_team",
+    "email": ["dqthinh1@cmcglobal.vn"],
+    "retries": 2,
+    "retry_delay": "300"
+  },
+  "tasks": [
+    {
+      "task_id": "source2bronze_init_load_V_T_ERC_MONTHLY_DETAIL",
+      "task_type": "spark",
+      "task_params": {
+        "application": "/opt/jobs/transform_customer.py",
+        "name": "source2bronze_init_load_V_T_ERC_MONTHLY_DETAIL",
+        "application_args": [
+          "--run_date", "{{ ds }}"
+        ],
+        "conf": {
+            "spark.kubernetes.namespace": "compute",
+            "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.1-oracle",
+            "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
+            "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+            "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+            "spark.sql.catalogImplementation": "hive",
+            "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083",
+            "spark.sql.warehouse.dir": "s3a://warehouse/",
+            "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000",
+            "spark.hadoop.fs.s3a.access.key": "minioadmin",
+            "spark.hadoop.fs.s3a.secret.key": "minio@demo!",
+            "spark.hadoop.fs.s3a.path.style.access": "true",
+            "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+            "spark.sql.sources.partitionOverwriteMode": "dynamic",
+            "spark.eventLog.dir": "s3a://spark-logs/events",
+            "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp"
+        }
+      }
+    },
+    {
+      "task_id": "bronze2silver_init_load_V_T_ERC_MONTHLY_DETAIL",
+      "task_type": "spark",
+      "depend_on": ["source2bronze_init_load_V_T_ERC_MONTHLY_DETAIL"],
+      "task_params": {
+        "application": "/opt/jobs/transform_customer.py",
+        "name": "bronze2silver_init_load_V_T_ERC_MONTHLY_DETAIL",
+        "application_args": [
+          "--run_date", "{{ ds }}",
+          "--job_input", ""
+        ],
+        "conf": {
+          "spark.kubernetes.namespace": "compute",
+            "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.1-oracle",
+            "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
+            "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+            "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+            "spark.sql.catalogImplementation": "hive",
+            "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083",
+            "spark.sql.warehouse.dir": "s3a://warehouse/",
+            "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000",
+            "spark.hadoop.fs.s3a.access.key": "minioadmin",
+            "spark.hadoop.fs.s3a.secret.key": "minio@demo!",
+            "spark.hadoop.fs.s3a.path.style.access": "true",
+            "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+            "spark.sql.sources.partitionOverwriteMode": "dynamic",
+            "spark.eventLog.dir": "s3a://spark-logs/events",
+            "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp"
+        }
+      }
+    }
+  ]
+}
