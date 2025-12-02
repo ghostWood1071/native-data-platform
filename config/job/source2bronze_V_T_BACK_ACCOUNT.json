@@ -1,5 +1,5 @@
 {
-    "job_id": "source2bronze_init_load_V_T_BACK_ACCOUNT",
+    "job_id": "source2bronze_V_T_BACK_ACCOUNT",
     "schedule": "",
     "depend_on": "",
     "run_mode": {

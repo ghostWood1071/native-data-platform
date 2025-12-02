@@ -1,5 +1,5 @@
 {
-  "dag_id": "source2silver_init_load_V_T_LIST_FRONT_USER_workflow",
+  "dag_id": "source2silver_V_T_LIST_FRONT_USER_workflow",
   "description": "source -> bronze -> silver",
   "schedule": "0 2 * * *",
   "start_date": "2025-01-01 00:00:00",
@@ -13,13 +13,16 @@
   },
   "tasks": [
     {
-      "task_id": "source2bronze_init_load_V_T_LIST_FRONT_USER",
+      "task_id": "source2bronze_V_T_LIST_FRONT_USER",
       "task_type": "spark",
+      "conn_id": "k8s",
       "task_params": {
-        "application": "/opt/jobs/transform_customer.py",
-        "name": "source2bronze_init_load_V_T_LIST_FRONT_USER",
+        "application": "s3a://asset/spark-jobs/entry_point.py",
+        "name": "source2bronze_V_T_LIST_FRONT_USER",
+        "py_files": "/opt/airflow/dags/src.zip",
         "application_args": [
-          "--run_date", "{{ ds }}"
+          "--job_asset_bucket", "asset",
+          "--job_input_path", "job-input/source2bronze_V_T_LIST_FRONT_USER.json"
         ],
         "conf": {
             "spark.kubernetes.namespace": "compute",
@@ -36,21 +39,24 @@
             "spark.hadoop.fs.s3a.path.style.access": "true",
             "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
             "spark.sql.sources.partitionOverwriteMode": "dynamic",
+            "spark.eventLog.enabled": true,
             "spark.eventLog.dir": "s3a://spark-logs/events",
             "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp"
         }
       }
     },
     {
-      "task_id": "bronze2silver_init_load_V_T_LIST_FRONT_USER",
+      "task_id": "bronze2silver_V_T_LIST_FRONT_USER",
       "task_type": "spark",
-      "depend_on": ["source2bronze_init_load_V_T_LIST_FRONT_USER"],
+      "conn_id": "k8s",
+      "depend_on": ["source2bronze_V_T_LIST_FRONT_USER"],
       "task_params": {
-        "application": "/opt/jobs/transform_customer.py",
-        "name": "bronze2silver_init_load_V_T_LIST_FRONT_USER",
+        "application": "s3a://asset/spark-jobs/entry_point.py",
+        "name": "bronze2silver_V_T_LIST_FRONT_USER",
+        "py_files": "/opt/airflow/dags/src.zip",
         "application_args": [
-          "--run_date", "{{ ds }}",
-          "--job_input", ""
+          "--job_asset_bucket", "asset",
+          "--job_input_path", "job-input/bronze2silver_V_T_LIST_FRONT_USER.json"
         ],
         "conf": {
           "spark.kubernetes.namespace": "compute",
@@ -67,6 +73,7 @@
             "spark.hadoop.fs.s3a.path.style.access": "true",
             "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
             "spark.sql.sources.partitionOverwriteMode": "dynamic",
+            "spark.eventLog.enabled": true,
             "spark.eventLog.dir": "s3a://spark-logs/events",
             "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp"
         }

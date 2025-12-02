@@ -1,5 +1,5 @@
 {
-    "job_id": "source2bronze_init_load_T_BACK_DEAL_HISTORY",
+    "job_id": "source2bronze_T_BACK_DEAL_HISTORY",
     "schedule": "",
     "depend_on": "",
     "run_mode": {

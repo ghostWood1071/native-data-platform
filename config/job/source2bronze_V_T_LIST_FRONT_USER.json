@@ -1,13 +1,13 @@
 {
-    "job_id": "source2bronze_init_load_T_TLO_DEBIT_BALANCE_HISTORY",
+    "job_id": "source2bronze_V_T_LIST_FRONT_USER",
     "schedule": "",
     "depend_on": "",
     "run_mode": {
         "name": "default"
     },
     "extract": {
-        "T_TLO_DEBIT_BALANCE_HISTORY": {
-            "table": "BACK.T_TLO_DEBIT_BALANCE_HISTORY",
+        "V_T_LIST_FRONT_USER": {
+            "table": "MISUSER.V_T_LIST_FRONT_USER",
             "url": "jdbc:oracle:thin:@10.91.101.161:1521/tradingnkt",
             "properties": {
                 "user": "mispoc",
@@ -20,14 +20,7 @@
     "transform": {
         "transformer": "ConfigTransformer",
         "transformation": {
-          "T_TLO_DEBIT_BALANCE_HISTORY": [
-            {
-              "op": "withColumn",
-              "args": {
-                "colName": "partition_date",
-                "col": "F.to_date(F.col('C_TRANSACTION_DATE'))"
-              }
-            },
+          "V_T_LIST_FRONT_USER": [
             {
               "op": "withColumn",
               "args": {
@@ -39,15 +32,15 @@
         }
     },
     "load": {
-        "T_TLO_DEBIT_BALANCE_HISTORY": {
-            "table_name": "spark_catalog.bronze.T_TLO_DEBIT_BALANCE_HISTORY",
+        "V_T_LIST_FRONT_USER": {
+            "table_name": "spark_catalog.bronze.V_T_LIST_FRONT_USER",
             "writer": "DeltaWriter",
             "mode": "append",
             "format": "delta",
             "partition_by": [
                 "etl_date"
             ],
-            "path": "s3a://warehouse/bronze/T_TLO_DEBIT_BALANCE_HISTORY"
+            "path": "s3a://warehouse/bronze/V_T_LIST_FRONT_USER"
         }
     }
 }
