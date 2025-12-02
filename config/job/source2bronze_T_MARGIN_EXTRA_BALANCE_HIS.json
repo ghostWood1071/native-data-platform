@@ -1,13 +1,13 @@
 {
-    "job_id": "source2bronze_init_load_V_T_ERC_MONTHLY_DETAIL",
+    "job_id": "source2bronze_T_MARGIN_EXTRA_BALANCE_HIS",
     "schedule": "",
     "depend_on": "",
     "run_mode": {
         "name": "default"
     },
     "extract": {
-        "V_T_ERC_MONTHLY_DETAIL": {
-            "table": "MISUSER.V_T_ERC_MONTHLY_DETAIL",
+        "T_MARGIN_EXTRA_BALANCE_HIS": {
+            "table": "BACK.T_MARGIN_EXTRA_BALANCE_HIS",
             "url": "jdbc:oracle:thin:@10.91.101.161:1521/tradingnkt",
             "properties": {
                 "user": "mispoc",
@@ -20,19 +20,12 @@
     "transform": {
         "transformer": "ConfigTransformer",
         "transformation": {
-          "V_T_ERC_MONTHLY_DETAIL": [
+          "T_MARGIN_EXTRA_BALANCE_HIS": [
             {
               "op": "withColumn",
               "args": {
-                "colName": "partition_year",
-                "col": "F.to_date(F.col('C_YEAR'))"
-              }
-            },
-            {
-              "op": "withColumn",
-              "args": {
-                "colName": "partition_month",
-                "col": "F.to_date(F.col('C_MONTH'))"
+                "colName": "partition_date",
+                "col": "F.to_date(F.col('C_TRADING_DATE'))"
               }
             },
             {
@@ -46,15 +39,15 @@
         }
     },
     "load": {
-        "V_T_ERC_MONTHLY_DETAIL": {
-            "table_name": "spark_catalog.bronze.V_T_ERC_MONTHLY_DETAIL",
+        "T_MARGIN_EXTRA_BALANCE_HIS": {
+            "table_name": "spark_catalog.bronze.T_MARGIN_EXTRA_BALANCE_HIS",
             "writer": "DeltaWriter",
             "mode": "append",
             "format": "delta",
             "partition_by": [
                 "etl_date"
             ],
-            "path": "s3a://warehouse/bronze/V_T_ERC_MONTHLY_DETAIL"
+            "path": "s3a://warehouse/bronze/T_MARGIN_EXTRA_BALANCE_HIS"
         }
     }
 }

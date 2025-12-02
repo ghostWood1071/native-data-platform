@@ -1,13 +1,13 @@
 {
-    "job_id": "bronze2silver_init_load_T_TLO_DEBIT_BALANCE_HISTORY",
+    "job_id": "bronze2silver_T_BACK_DEAL_HISTORY",
     "schedule": "",
-    "depend_on": ["source2bronze_init_load_T_TLO_DEBIT_BALANCE_HISTORY"],
+    "depend_on": ["source2bronze_T_BACK_DEAL_HISTORY"],
     "run_mode": {
         "name": "default"
     },
     "extract": {
-        "T_TLO_DEBIT_BALANCE_HISTORY": {
-            "table": "spark_catalog.bronze.T_TLO_DEBIT_BALANCE_HISTORY",
+        "T_BACK_DEAL_HISTORY": {
+            "table": "spark_catalog.bronze.T_BACK_DEAL_HISTORY",
             "reader": "DeltaReader"
         }
     },
@@ -17,15 +17,15 @@
         }
     },
     "load": {
-        "T_TLO_DEBIT_BALANCE_HISTORY": {
-            "table_name": "spark_catalog.silver.T_TLO_DEBIT_BALANCE_HISTORY",
+        "T_BACK_DEAL_HISTORY": {
+            "table_name": "spark_catalog.silver.T_BACK_DEAL_HISTORY",
             "writer": "DeltaWriter",
             "mode": "append",
             "format": "delta",
             "partition_by": [
                 "partition_date"
             ],
-            "path": "s3a://warehouse/silver/T_TLO_DEBIT_BALANCE_HISTORY"
+            "path": "s3a://warehouse/silver/T_BACK_DEAL_HISTORY"
         }
     }
 }

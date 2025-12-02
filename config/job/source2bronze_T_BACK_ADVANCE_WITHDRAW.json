@@ -1,5 +1,5 @@
 {
-    "job_id": "source2bronze_init_load_T_BACK_ADVANCE_WITHDRAW",
+    "job_id": "source2bronze_T_BACK_ADVANCE_WITHDRAW",
     "schedule": "",
     "depend_on": "",
     "run_mode": {
@@ -7,11 +7,11 @@
     },
     "extract": {
         "T_BACK_ADVANCE_WITHDRAW": {
-            "table": "CHIENNC.T_BACK_ADVANCE_WITHDRAW",
-            "url": "jdbc:oracle:thin:@oracledb:1521/tradingnkt",
+            "table": "BACK.T_BACK_ADVANCE_WITHDRAW",
+            "url": "jdbc:oracle:thin:@10.91.101.161:1521/tradingnkt",
             "properties": {
-                "user": "chiennc",
-                "password": "123456",
+                "user": "mispoc",
+                "password": "d8daa822c8b0c6f9d85",
                 "driver": "oracle.jdbc.driver.OracleDriver"
             },
             "reader": "JDBCReader"
@@ -41,7 +41,7 @@
     "load": {
         "T_BACK_ADVANCE_WITHDRAW": {
             "table_name": "spark_catalog.bronze.T_BACK_ADVANCE_WITHDRAW",
-            "writer": "ConsoleWriter",
+            "writer": "DeltaWriter",
             "mode": "append",
             "format": "delta",
             "partition_by": [

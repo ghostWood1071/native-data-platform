@@ -1,13 +1,13 @@
 {
-    "job_id": "source2bronze_init_load_V_T_LIST_FRONT_USER",
+    "job_id": "source2bronze_T_LIST_BRANCH_BANK_ADV_WDR",
     "schedule": "",
     "depend_on": "",
     "run_mode": {
         "name": "default"
     },
     "extract": {
-        "V_T_LIST_FRONT_USER": {
-            "table": "MISUSER.V_T_LIST_FRONT_USER",
+        "T_LIST_BRANCH_BANK_ADV_WDR": {
+            "table": "BACK.T_LIST_BRANCH_BANK_ADV_WDR",
             "url": "jdbc:oracle:thin:@10.91.101.161:1521/tradingnkt",
             "properties": {
                 "user": "mispoc",
@@ -20,7 +20,7 @@
     "transform": {
         "transformer": "ConfigTransformer",
         "transformation": {
-          "V_T_LIST_FRONT_USER": [
+          "T_LIST_BRANCH_BANK_ADV_WDR": [
             {
               "op": "withColumn",
               "args": {
@@ -32,15 +32,15 @@
         }
     },
     "load": {
-        "V_T_LIST_FRONT_USER": {
-            "table_name": "spark_catalog.bronze.V_T_LIST_FRONT_USER",
+        "T_LIST_BRANCH_BANK_ADV_WDR": {
+            "table_name": "spark_catalog.bronze.T_LIST_BRANCH_BANK_ADV_WDR",
             "writer": "DeltaWriter",
             "mode": "append",
             "format": "delta",
             "partition_by": [
                 "etl_date"
             ],
-            "path": "s3a://warehouse/bronze/V_T_LIST_FRONT_USER"
+            "path": "s3a://warehouse/bronze/T_LIST_BRANCH_BANK_ADV_WDR"
         }
     }
 }

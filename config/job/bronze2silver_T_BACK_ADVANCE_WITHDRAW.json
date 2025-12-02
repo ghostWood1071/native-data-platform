@@ -1,13 +1,13 @@
 {
-    "job_id": "bronze2silver_init_load_T_MARGIN_EXTRA_BALANCE_HIS",
+    "job_id": "bronze2silver_T_BACK_ADVANCE_WITHDRAW",
     "schedule": "",
-    "depend_on": ["source2bronze_init_load_T_MARGIN_EXTRA_BALANCE_HIS"],
+    "depend_on": ["source2bronze_T_BACK_ADVANCE_WITHDRAW"],
     "run_mode": {
         "name": "default"
     },
     "extract": {
-        "T_MARGIN_EXTRA_BALANCE_HIS": {
-            "table": "spark_catalog.bronze.T_MARGIN_EXTRA_BALANCE_HIS",
+        "T_BACK_ADVANCE_WITHDRAW": {
+            "table": "spark_catalog.bronze.T_BACK_ADVANCE_WITHDRAW",
             "reader": "DeltaReader"
         }
     },
@@ -17,15 +17,15 @@
         }
     },
     "load": {
-        "T_MARGIN_EXTRA_BALANCE_HIS": {
-            "table_name": "spark_catalog.silver.T_MARGIN_EXTRA_BALANCE_HIS",
+        "T_BACK_ADVANCE_WITHDRAW": {
+            "table_name": "spark_catalog.silver.T_BACK_ADVANCE_WITHDRAW",
             "writer": "DeltaWriter",
             "mode": "append",
             "format": "delta",
             "partition_by": [
                 "partition_date"
             ],
-            "path": "s3a://warehouse/silver/T_MARGIN_EXTRA_BALANCE_HIS"
+            "path": "s3a://warehouse/silver/T_BACK_ADVANCE_WITHDRAW"
         }
     }
 }
