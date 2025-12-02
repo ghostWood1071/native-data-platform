@@ -1,7 +1,7 @@
 {
   "dag_id": "source2silver_T_BACK_DEAL_HISTORY_workflow",
   "description": "source -> bronze -> silver",
-  "schedule": "0 2 * * *",
+  "schedule": "0 1 * * *",
   "start_date": "2025-01-01 00:00:00",
   "active": true,
   "tags": ["source2bronze", "bronze2silver"],
@@ -15,7 +15,7 @@
     {
       "task_id": "source2bronze_T_BACK_DEAL_HISTORY",
       "task_type": "spark",
-      "conn_id": "k8s",
+      "conn_id": "spark_k8s",
       "task_params": {
         "application": "s3a://asset/spark-jobs/entry_point.py",
         "name": "source2bronze_T_BACK_DEAL_HISTORY",
@@ -48,7 +48,7 @@
     {
       "task_id": "bronze2silver_T_BACK_DEAL_HISTORY",
       "task_type": "spark",
-      "conn_id": "k8s",
+      "conn_id": "spark_k8s",
       "depend_on": ["source2bronze_T_BACK_DEAL_HISTORY"],
       "task_params": {
         "application": "s3a://asset/spark-jobs/entry_point.py",
