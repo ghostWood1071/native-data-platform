@@ -25,6 +25,8 @@ services:
     volumes:
       - ../../infra/postgres-init:/docker-entrypoint-initdb.d
       - ../../infra/pg-metastore-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     networks:
       - datanet
 

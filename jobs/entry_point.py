@@ -1,2 +1,2 @@
 from src.core import runner
-runner.run("source2")
+runner.run()

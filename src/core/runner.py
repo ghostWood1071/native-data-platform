@@ -3,10 +3,17 @@ from src.core.factory import Factory
 from src.core.engine import ETL
 from src.core import util
 
-def run(spark_config_path, job_config_path: str):
+def run():
     run_data_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-    spark = Factory.create_spark(Factory.read_config(spark_config_path))
-    job_conf = Factory.read_config(job_config_path)
+    spark = Factory.create_spark()
+    config_path = util.download_file_from_minio(
+        spark.conf.get("spark.hadoop.fs.s3a.endpoint"),
+        spark.conf.get("spark.hadoop.fs.s3a.access.key"),
+        spark.conf.get("spark.hadoop.fs.s3a.secret.key"),
+        spark.conf.get("app.job_asset_bucket"),
+        spark.conf.get("app.job_input_path")
+    )
+    job_conf = Factory.read_config(config_path)
     run_mode = job_conf.get("run_mode")
     if run_mode.get("name") == "default":
         ETL.execute(spark, job_conf, run_data_date)
