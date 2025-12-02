@@ -24,15 +24,12 @@ def build_task(task_row, dag):
         return SparkSubmitOperator(
             task_id=task_row["task_id"],
             dag=dag,
+            py_files=params.get("py_files"),
+            conn_id=task_row["conn_id"],
             application=params.get("application"),
             name=params.get("name", task_row["task_id"]),
             application_args=params.get("application_args", []),
-            conf=params.get("conf", {}),
-            jars=params.get("jars"),
-            packages=params.get("packages"),
-            driver_memory=params.get("driver_memory", "1g"),
-            executor_memory=params.get("executor_memory", "2g"),
-            executor_cores=params.get("executor_cores", 1),
+            conf=params.get("conf", {})
         )
 
     raise ValueError(f"Unknown task_type: {ttype}")
@@ -67,15 +64,16 @@ def load_metadata():
         return {}
     dag_ids = tuple(dags_meta.keys())
     cursor.execute("""
-                   SELECT dag_id, task_id, task_type::text, task_params
+                   SELECT dag_id, task_id, conn_id, task_type::text, task_params
                    FROM etl_task
                    WHERE dag_id = ANY(%s)
                    """, (list(dag_ids),))
-    for dag_id, task_id, task_type, task_params in cursor.fetchall():
+    for dag_id, task_id, conn_id, task_type, task_params in cursor.fetchall():
         dags_meta[dag_id]["tasks"].append({
             "task_id": task_id,
             "task_type": task_type,
-            "task_params": task_params
+            "task_params": task_params,
+            "conn_id": conn_id
         })
 
     cursor.execute("""
@@ -117,6 +115,7 @@ for dag_id, meta in metadata.items():
 
     task_objs = {}
     for t in meta["tasks"]:
+        #raise Exception(t.keys())
         task_obj = build_task(t, dag)
         task_objs[t["task_id"]] = task_obj
 

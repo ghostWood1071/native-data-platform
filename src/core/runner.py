@@ -7,11 +7,13 @@ def run():
     run_data_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     spark = Factory.create_spark()
     config_path = util.download_file_from_minio(
-        spark.conf.get("spark.hadoop.fs.s3a.endpoint"),
+        spark.conf.get("spark.hadoop.fs.s3a.endpoint").replace("http://", ""),
         spark.conf.get("spark.hadoop.fs.s3a.access.key"),
         spark.conf.get("spark.hadoop.fs.s3a.secret.key"),
-        spark.conf.get("app.job_asset_bucket"),
-        spark.conf.get("app.job_input_path")
+        # spark.conf.get("app.job_asset_bucket"),
+        util.get_external_config("job_asset_bucket"),
+        util.get_external_config("job_input_path")
+        # spark.conf.get("app.job_input_path")
     )
     job_conf = Factory.read_config(config_path)
     run_mode = job_conf.get("run_mode")

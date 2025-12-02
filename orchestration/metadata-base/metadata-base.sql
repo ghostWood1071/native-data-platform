@@ -13,8 +13,9 @@ CREATE TYPE task_type AS ENUM ('bash', 'spark', 'python', 'dummy');
 
 CREATE TABLE etl_task (
       id SERIAL PRIMARY KEY,
-      dag_id VARCHAR(100) NOT NULL REFERENCES etl_dag(dag_id) ON DELETE CASCADE,
+      dag_id VARCHAR(100) NOT NULL,
       task_id VARCHAR(100) NOT NULL,
+      conn_id VARCHAR(100),
       task_type task_type NOT NULL,
       operator_class  VARCHAR(255),
       task_params JSONB
@@ -22,7 +23,7 @@ CREATE TABLE etl_task (
 
 CREATE TABLE etl_dependency (
     id SERIAL PRIMARY KEY,
-    dag_id VARCHAR(100) NOT NULL REFERENCES etl_dag(dag_id) ON DELETE CASCADE,
+    dag_id VARCHAR(100) NOT NULL,
     upstream_task_id VARCHAR(100) NOT NULL,
     downstream_task_id VARCHAR(100) NOT NULL
 );
@@ -75,3 +76,14 @@ VALUES
     ('customer_etl', 'extract_customer', 'transform_customer'),
     ('customer_etl', 'transform_customer', 'load_customer');
 
+
+
+
+INSERT INTO etl_task (dag_id, task_id, task_type, conn_id, task_params)
+VALUES (
+           'source2silver_T_BACK_ADVANCE_WITHDRAW_workflow',
+           'source2bronze_T_BACK_ADVANCE_WITHDRAW',
+           'spark',
+            'spark_k8s',
+           '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "source2bronze_T_BACK_ADVANCE_WITHDRAW", "py_files": "/opt/airflow/dags/src.zip", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/source2bronze_T_BACK_ADVANCE_WITHDRAW.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.1-oracle", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp"}}'::jsonb
+       );

@@ -50,12 +50,13 @@ def get_insert_dags_cmd(dag_id, description, schedule_interval, start_date, is_a
               );
     """
 
-def get_insert_task_cmd(dag_id, task_id, task_type, task_params):
+def get_insert_task_cmd(dag_id, task_id, conn_id, task_type, task_params):
     return f"""
-        INSERT INTO etl_task (dag_id, task_id, task_type, task_params)
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
         VALUES (
                    '{dag_id}',
                    '{task_id}',
+                   '{conn_id}',
                    '{task_type}',
                    '{json.dumps(task_params)}'::jsonb
                );
@@ -81,23 +82,23 @@ def load_config(db, dag_config_path):
             config_json.get("tags"),
             config_json.get('default_args'),
         )
-        db.execute(insert_dags_cmd)
-        # print(insert_dags_cmd)
+        # db.execute(insert_dags_cmd)
+        print(insert_dags_cmd)
         if not config_json.get("tasks"):
             return
         for task in config_json.get("tasks"):
             current_task = task.get("task_id")
             insert_task_cmd = get_insert_task_cmd(
-                dag_id, current_task, task.get("task_type"), task.get("task_params")
+                dag_id, current_task, task.get("conn_id") ,task.get("task_type"), task.get("task_params")
             )
-            db.execute(insert_task_cmd)
-            # print(insert_task_cmd)
+            # db.execute(insert_task_cmd)
+            print(insert_task_cmd)
             if not task.get("depend_on"):
                 continue
             for depend_id in task.get("depend_on"):
                 insert_depend_cmd = get_dependency_task_cmd(dag_id, depend_id, current_task)
-                db.execute(insert_depend_cmd)
-                # print(insert_depend_cmd)
+                # db.execute(insert_depend_cmd)
+                print(insert_depend_cmd)
 
 
 
@@ -110,6 +111,7 @@ def load_config_batch(db):
         path = f"{config_path}{config_file}"
         print(path)
         load_config(db, path)
+        break
 
 
 

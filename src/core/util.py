@@ -34,3 +34,12 @@ def download_file_from_minio(minio_endpoint, access_key, secret_key, bucket, fil
         return download_path
     except S3Error as e:
         raise e
+
+
+def get_external_config(config_name):
+    import sys
+    for i in range(len(sys.argv)):
+        if sys.argv[i] == "--" + config_name:
+            value = sys.argv[i + 1]
+            return value
+    return None
