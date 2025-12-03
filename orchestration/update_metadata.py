@@ -83,7 +83,7 @@ def load_config(db, dag_config_path):
             config_json.get('default_args'),
         )
         # db.execute(insert_dags_cmd)
-        print(insert_dags_cmd)
+        db.write(insert_dags_cmd)
         if not config_json.get("tasks"):
             return
         for task in config_json.get("tasks"):
@@ -92,38 +92,38 @@ def load_config(db, dag_config_path):
                 dag_id, current_task, task.get("conn_id") ,task.get("task_type"), task.get("task_params")
             )
             # db.execute(insert_task_cmd)
-            print(insert_task_cmd)
+            db.write(insert_task_cmd)
             if not task.get("depend_on"):
                 continue
             for depend_id in task.get("depend_on"):
                 insert_depend_cmd = get_dependency_task_cmd(dag_id, depend_id, current_task)
                 # db.execute(insert_depend_cmd)
-                print(insert_depend_cmd)
-
-
+                db.write(insert_depend_cmd)
+                
 
 def load_config_batch(db):
     config_path = "../config/workflow/"
     import os
     config_files = os.listdir(config_path)
     print(config_files)
+    file = open(r"create_job.sql", mode = 'w')
     for config_file in config_files:
         path = f"{config_path}{config_file}"
         print(path)
-        load_config(db, path)
-        break
+        load_config(file, path)
+    file.close()
 
 
 
 if __name__ == "__main__":
     # Kết nối
-    db = PostgresDB(
-        host="localhost",
-        db="airflow",
-        user="hive",
-        pwd="hive"
-    )
-    # db = None
-    truncate_all(db)
+    # db = PostgresDB(
+    #     host="localhost",
+    #     db="airflow",
+    #     user="hive",
+    #     pwd="hive"
+    # )
+    db = None
+    # truncate_all(db)
     load_config_batch(db)
     print("DONE!")

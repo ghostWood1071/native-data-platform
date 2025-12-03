@@ -19,6 +19,8 @@ class DeltaReader(BaseReader):
         query = self.config.get("query")
         df = None
         if query:
+            if "${run_date}" in query:
+                query = query.replace("${run_date}", self.run_data_date)
             df = self.spark.sql(query)
         if not query:
             df = self.spark.table(table)

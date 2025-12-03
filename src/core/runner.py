@@ -20,9 +20,14 @@ def run():
     if run_mode.get("name") == "default":
         ETL.execute(spark, job_conf, run_data_date)
     if run_mode.get("name") == "back_fill":
-        start_date = datetime.strptime(run_mode.get("start"), "%Y-%m-%d")
-        end_date = datetime.strptime(run_mode.get("end"), "%-%m-%d")
-        step = run_mode.get("step")
-        dates_run = util.gen_date_range(start_date, end_date, step)
+        if not isinstance(run_mode.get("start"), int):
+            start_date = datetime.strptime(run_mode.get("start"), "%Y-%m-%d")
+            end_date = datetime.strptime(run_mode.get("end"), "%Y-%m-%d")
+            step = run_mode.get("step")
+            dates_run = util.gen_date_range(start_date, end_date, step)
+        else:
+            start_date = run_mode.get("start")
+            end_date = run_mode.get("end")
+            dates_run = list(range(start_date, end_date+1))
         for date_run in dates_run:
             ETL.execute(spark, job_conf, date_run)
