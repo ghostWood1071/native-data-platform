@@ -19,14 +19,14 @@
       "task_params": {
         "application": "s3a://asset/spark-jobs/entry_point.py",
         "name": "source2bronze_T_BACK_ADVANCE_WITHDRAW",
-        "py_files": "/opt/airflow/dags/src.zip",
+
         "application_args": [
           "--job_asset_bucket", "asset",
           "--job_input_path", "job-input/source2bronze_T_BACK_ADVANCE_WITHDRAW.json"
         ],
         "conf": {
             "spark.kubernetes.namespace": "compute",
-            "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.1-oracle",
+            "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf",
             "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
             "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
             "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
@@ -41,7 +41,9 @@
             "spark.sql.sources.partitionOverwriteMode": "dynamic",
             "spark.eventLog.enabled": true,
             "spark.eventLog.dir": "s3a://spark-logs/events",
-            "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp"
+            "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp",
+            "app.job_asset_bucket": "asset",
+            "app.job_input_path": "job-input/source2bronze_T_BACK_ADVANCE_WITHDRAW.json"
         }
       }
     },
@@ -53,14 +55,13 @@
       "task_params": {
         "application": "s3a://asset/spark-jobs/entry_point.py",
         "name": "bronze2silver_T_BACK_ADVANCE_WITHDRAW",
-        "py_files": "/opt/airflow/dags/src.zip",
         "application_args": [
           "--job_asset_bucket", "asset",
           "--job_input_path", "job-input/bronze2silver_T_BACK_ADVANCE_WITHDRAW.json"
         ],
         "conf": {
           "spark.kubernetes.namespace": "compute",
-            "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.1-oracle",
+            "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf",
             "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
             "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
             "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
@@ -75,7 +76,9 @@
             "spark.sql.sources.partitionOverwriteMode": "dynamic",
             "spark.eventLog.enabled": true,
             "spark.eventLog.dir": "s3a://spark-logs/events",
-            "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp"
+            "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp",
+            "app.job_asset_bucket": "asset",
+            "app.job_input_path": "job-input/bronze2silver_T_BACK_ADVANCE_WITHDRAW.json"
         }
       }
     }
