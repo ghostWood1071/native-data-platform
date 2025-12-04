@@ -1,7 +1,7 @@
 {
   "dag_id": "source2silver_V_T_ERC_MONTHLY_DETAIL_workflow",
   "description": "source -> bronze -> silver",
-  "schedule": "0 1 * * *",
+  "schedule": "0 18 L * *",
   "start_date": "2025-01-01 00:00:00",
   "active": true,
   "tags": ["source2bronze", "bronze2silver"],
