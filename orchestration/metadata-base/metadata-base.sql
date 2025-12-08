@@ -1,6 +1,6 @@
 CREATE TABLE etl_dag (
      id SERIAL PRIMARY KEY,
-     dag_id VARCHAR(100) UNIQUE NOT NULL,
+     dag_id VARCHAR(100),
      description TEXT,
      schedule_interval VARCHAR(50),
      start_date TIMESTAMP NOT NULL DEFAULT NOW(),

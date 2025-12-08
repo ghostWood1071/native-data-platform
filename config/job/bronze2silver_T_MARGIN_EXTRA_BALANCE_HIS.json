@@ -7,20 +7,28 @@
     },
     "extract": {
         "T_MARGIN_EXTRA_BALANCE_HIS": {
-            "table": "spark_catalog.bronze.T_MARGIN_EXTRA_BALANCE_HIS",
+            "query": "SELECT * FROM bronze.daily_load_T_MARGIN_EXTRA_BALANCE_HIS WHERE CAST(etl_date AS DATE) = CAST(current_timestamp() + INTERVAL 7 HOURS AS DATE)",
             "reader": "DeltaReader"
         }
     },
     "transform": {
         "transformer": "ConfigTransformer",
         "transformation": {
+            "T_MARGIN_EXTRA_BALANCE_HIS": [
+                {
+                    "op": "drop",
+                    "args": {
+                        "cols": ["etl_date"]
+                    }
+                }
+            ]
         }
     },
     "load": {
         "T_MARGIN_EXTRA_BALANCE_HIS": {
             "table_name": "spark_catalog.silver.T_MARGIN_EXTRA_BALANCE_HIS",
             "writer": "DeltaWriter",
-            "mode": "append",
+            "mode": "overwrite",
             "format": "delta",
             "partition_by": [
                 "partition_date"

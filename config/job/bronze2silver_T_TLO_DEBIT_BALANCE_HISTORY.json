@@ -7,7 +7,7 @@
     },
     "extract": {
         "T_TLO_DEBIT_BALANCE_HISTORY": {
-            "table": "spark_catalog.bronze.T_TLO_DEBIT_BALANCE_HISTORY",
+            "query": "SELECT * FROM bronze.T_TLO_DEBIT_BALANCE_HISTORY WHERE CAST(etl_date AS DATE) = CAST(current_timestamp() + INTERVAL 7 HOURS AS DATE)",
             "reader": "DeltaReader"
         }
     },
@@ -20,7 +20,7 @@
         "T_TLO_DEBIT_BALANCE_HISTORY": {
             "table_name": "spark_catalog.silver.T_TLO_DEBIT_BALANCE_HISTORY",
             "writer": "DeltaWriter",
-            "mode": "append",
+            "mode": "overwrite",
             "format": "delta",
             "partition_by": [
                 "partition_date"

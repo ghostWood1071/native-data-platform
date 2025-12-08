@@ -9,7 +9,7 @@
        VALUES (
                   'source2silver_T_BACK_ADVANCE_WITHDRAW_workflow',
                   'source -> bronze -> silver',
-                  '0 1 * * *',
+                  '0 18 * * *',
                   '2025-01-01 00:00:00',
                   true,
                   ARRAY['source2bronze', 'bronze2silver'],
@@ -42,7 +42,7 @@
        VALUES (
                   'source2silver_T_BACK_DEAL_HISTORY_workflow',
                   'source -> bronze -> silver',
-                  '0 1 * * *',
+                  '0 18 * * *',
                   '2025-01-01 00:00:00',
                   true,
                   ARRAY['source2bronze', 'bronze2silver'],
@@ -55,7 +55,7 @@
                    'source2bronze_T_BACK_DEAL_HISTORY',
                    'spark_k8s',
                    'spark',
-                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "source2bronze_T_BACK_DEAL_HISTORY", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/source2bronze_T_BACK_DEAL_HISTORY.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/source2bronze_T_BACK_DEAL_HISTORY.json"}}'::jsonb
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "source2bronze_T_BACK_DEAL_HISTORY", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/source2bronze_T_BACK_DEAL_HISTORY.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/source2bronze_T_BACK_DEAL_HISTORY.json", "spark.executor.instances": "2", "spark.executor.cores": "8", "spark.executor.memory": "8g"}}'::jsonb
                );
         
         INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
@@ -75,7 +75,7 @@
        VALUES (
                   'source2silver_T_LIST_BRANCH_BANK_ADV_WDR_workflow',
                   'source -> bronze -> silver',
-                  '0 1 * * *',
+                  NULL,
                   '2025-01-01 00:00:00',
                   true,
                   ARRAY['source2bronze', 'bronze2silver'],
@@ -108,7 +108,7 @@
        VALUES (
                   'source2silver_T_MARGIN_EXTRA_BALANCE_HIS_workflow',
                   'source -> bronze -> silver',
-                  '0 1 * * *',
+                  '0 18 * * *',
                   '2025-01-01 00:00:00',
                   true,
                   ARRAY['source2bronze', 'bronze2silver'],
@@ -141,7 +141,7 @@
        VALUES (
                   'source2silver_T_TLO_DEBIT_BALANCE_HISTORY_workflow',
                   'source -> bronze -> silver',
-                  '0 1 * * *',
+                  '0 18 * * *',
                   '2025-01-01 00:00:00',
                   true,
                   ARRAY['source2bronze', 'bronze2silver'],
@@ -174,7 +174,7 @@
        VALUES (
                   'source2silver_V_T_BACK_ACCOUNT_workflow',
                   'source -> bronze -> silver',
-                  '0 1 * * *',
+                  '0 18 * * *',
                   '2025-01-01 00:00:00',
                   true,
                   ARRAY['source2bronze', 'bronze2silver'],
@@ -207,7 +207,7 @@
        VALUES (
                   'source2silver_V_T_ERC_MONTHLY_DETAIL_workflow',
                   'source -> bronze -> silver',
-                  '0 1 * * *',
+                  '0 18 L * *',
                   '2025-01-01 00:00:00',
                   true,
                   ARRAY['source2bronze', 'bronze2silver'],
@@ -240,7 +240,7 @@
        VALUES (
                   'source2silver_V_T_LIST_FRONT_USER_workflow',
                   'source -> bronze -> silver',
-                  '0 1 * * *',
+                  NULL,
                   '2025-01-01 00:00:00',
                   true,
                   ARRAY['source2bronze', 'bronze2silver'],

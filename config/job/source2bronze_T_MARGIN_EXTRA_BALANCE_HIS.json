@@ -3,13 +3,11 @@
     "schedule": "",
     "depend_on": "",
     "run_mode": {
-        "name": "back_fill",
-        "start": 2008,
-        "end": 2025
+        "name": "default"
     },
     "extract": {
         "T_MARGIN_EXTRA_BALANCE_HIS": {
-            "table": "BACK.T_MARGIN_EXTRA_BALANCE_HIS",
+            "table": "(SELECT * FROM BACK.T_MARGIN_EXTRA_BALANCE_HIS WHERE C_TRADING_DATE >= TRUNC(SYSDATE) -1 AND C_TRADING_DATE < TRUNC(SYSDATE)) tbl",
             "url": "jdbc:oracle:thin:@10.91.101.161:1521/tradingnkt",
             "properties": {
                 "user": "mispoc",
@@ -42,14 +40,15 @@
     },
     "load": {
         "T_MARGIN_EXTRA_BALANCE_HIS": {
-            "table_name": "spark_catalog.bronze.T_MARGIN_EXTRA_BALANCE_HIS",
+            "table_name": "spark_catalog.bronze.daily_load_T_MARGIN_EXTRA_BALANCE_HIS",
             "writer": "DeltaWriter",
-            "mode": "append",
+            "mode": "overwrite",
+            "first": true,
             "format": "delta",
             "partition_by": [
                 "etl_date"
             ],
-            "path": "s3a://warehouse/bronze/T_MARGIN_EXTRA_BALANCE_HIS"
+            "path": "s3a://warehouse/bronze/daily_load_T_MARGIN_EXTRA_BALANCE_HIS"
         }
     }
 }

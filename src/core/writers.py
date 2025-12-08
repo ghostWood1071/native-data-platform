@@ -54,13 +54,21 @@ class DeltaWriter(BaseWriter):
         db_name = fqn_table_name.split(".")[1]
         partition_cols = self.config.get("partition_by", [])
         self.spark.sql(f"CREATE DATABASE IF NOT EXISTS {db_name}")
+        first = self.config.get("first", False)
         (
             df.write.format("delta")
                             .mode("overwrite")
                             .partitionBy(*partition_cols)
                             .option("path", self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}"))
-                            .saveAsTable(f"{db_name}.{table_name}")
+                            .save()
         )
+        if first:
+            self.spark.sql(f"DROP TABLE IF EXISTS {db_name}.{table_name}")
+            self.spark.sql(f"""
+                CREATE TABLE IF NOT EXISTS {db_name}.{table_name}
+                USING delta
+                LOCATION '{self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}")}'
+            """)
 
     def overwrite(self, df: DataFrame):
         fqn_table_name = self.config.get("table_name") #catalog.database.table
@@ -68,13 +76,21 @@ class DeltaWriter(BaseWriter):
         db_name = fqn_table_name.split(".")[1]
         partition_cols = self.config.get("partition_by", [])
         self.spark.sql(f"CREATE DATABASE IF NOT EXISTS {db_name}")
+        first = self.config.get("first", False)
         (
             df.write.format("delta")
                             .mode("overwrite")
                             .partitionBy(*partition_cols)
                             .option("path", self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}"))
-                            .saveAsTable(f"{db_name}.{table_name}")
+                            .save()
         )
+        if first:
+            self.spark.sql(f"DROP TABLE IF EXISTS {db_name}.{table_name}")
+            self.spark.sql(f"""
+                CREATE TABLE IF NOT EXISTS {db_name}.{table_name}
+                USING delta
+                LOCATION '{self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}")}'
+            """)
 
 
     def append(self, df: DataFrame):
@@ -82,14 +98,22 @@ class DeltaWriter(BaseWriter):
         table_name = fqn_table_name.split(".")[2]
         db_name = fqn_table_name.split(".")[1]
         partition_cols = self.config.get("partition_by", [])
+        first = self.config.get("first", False)
         self.spark.sql(f"CREATE DATABASE IF NOT EXISTS {db_name}")
         (
             df.write.format("delta")
                             .mode("append")
                             .partitionBy(*partition_cols)
                             .option("path", self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}"))
-                            .saveAsTable(f"{db_name}.{table_name}")
+                            .save()
         )
+        if first:
+            self.spark.sql(f"DROP TABLE IF EXISTS {db_name}.{table_name}")
+            self.spark.sql(f"""
+                CREATE TABLE IF NOT EXISTS {db_name}.{table_name}
+                USING delta
+                LOCATION '{self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}")}'
+            """)
         
 
     def upsert(self, df: DataFrame):
@@ -100,7 +124,7 @@ class DeltaWriter(BaseWriter):
 
         merge_condition = " AND ".join([f"t.{col} = s.{col}" for col in primary_key])
         update_condition = " OR ".join([f"t.{col} <> s.{col}" for col in change_tracking_cols])
-        set_expr = ", ".join([f"t.{c} = s.{c}" for c in change_tracking_cols])
+        set_expr = ", ".join([f"{c} = s.{c}" for c in change_tracking_cols])
         insert_cols = ", ".join(df.columns)
         insert_vals = ", ".join([f"s.{c}" for c in df.columns])
         

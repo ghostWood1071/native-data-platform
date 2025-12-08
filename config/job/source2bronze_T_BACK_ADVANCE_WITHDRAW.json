@@ -7,7 +7,7 @@
     },
     "extract": {
         "T_BACK_ADVANCE_WITHDRAW": {
-            "table": "BACK.T_BACK_ADVANCE_WITHDRAW",
+            "table": "(SELECT * FROM BACK.T_BACK_ADVANCE_WITHDRAW WHERE C_APPROVE_TIME >= TRUNC(SYSDATE) -1 AND C_APPROVE_TIME < TRUNC(SYSDATE)) tbl",
             "url": "jdbc:oracle:thin:@10.91.101.161:1521/tradingnkt",
             "properties": {
                 "user": "mispoc",
@@ -42,7 +42,7 @@
         "T_BACK_ADVANCE_WITHDRAW": {
             "table_name": "spark_catalog.bronze.T_BACK_ADVANCE_WITHDRAW",
             "writer": "DeltaWriter",
-            "mode": "append",
+            "mode": "overwrite",
             "format": "delta",
             "partition_by": [
                 "etl_date"

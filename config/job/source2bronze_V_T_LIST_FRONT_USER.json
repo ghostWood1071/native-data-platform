@@ -36,6 +36,7 @@
             "table_name": "spark_catalog.bronze.V_T_LIST_FRONT_USER",
             "writer": "DeltaWriter",
             "mode": "append",
+            "first": true,
             "format": "delta",
             "partition_by": [
                 "etl_date"

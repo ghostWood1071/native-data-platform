@@ -7,7 +7,7 @@
     },
     "extract": {
         "T_BACK_DEAL_HISTORY": {
-            "table": "BACK.T_BACK_DEAL_HISTORY",
+            "table": "(SELECT * FROM BACK.T_BACK_DEAL_HISTORY WHERE C_TRANSACTION_DATE >= TRUNC(SYSDATE) - 1 AND C_TRANSACTION_DATE < TRUNC(SYSDATE)) tbl",
             "url": "jdbc:oracle:thin:@10.91.101.161:1521/tradingnkt",
             "properties": {
                 "user": "mispoc",
@@ -32,63 +32,63 @@
               "op": "withColumn",
               "args": {
                 "colName": "C_ORDER_NO",
-                "col": "F.col('C_ORDER_NO').cast(DecimalType(38, 10))"
+                "col": "F.col('C_ORDER_NO').cast(T.DecimalType(38, 10))"
               }
             },
             {
               "op": "withColumn",
               "args": {
                 "colName": "C_SUB_ORDER_NO",
-                "col": "F.col('C_SUB_ORDER_NO').cast(DecimalType(38, 10))"
+                "col": "F.col('C_SUB_ORDER_NO').cast(T.DecimalType(38, 10))"
               }
             },
             {
               "op": "withColumn",
               "args": {
                 "colName": "C_MATCHED_VOLUME",
-                "col": "F.col('C_MATCHED_VOLUME').cast(DecimalType(38, 10))"
+                "col": "F.col('C_MATCHED_VOLUME').cast(T.DecimalType(38, 10))"
               }
             },
             {
               "op": "withColumn",
               "args": {
                 "colName": "C_MATCHED_PRICE",
-                "col": "F.col('C_MATCHED_PRICE').cast(DecimalType(38, 10))"
+                "col": "F.col('C_MATCHED_PRICE').cast(T.DecimalType(38, 10))"
               }
             },
             {
               "op": "withColumn",
               "args": {
                 "colName": "C_COMM_RATE",
-                "col": "F.col('C_COMM_RATE').cast(DecimalType(38, 10))"
+                "col": "F.col('C_COMM_RATE').cast(T.DecimalType(38, 10))"
               }
             },
             {
               "op": "withColumn",
               "args": {
                 "colName": "C_TAX_FLAG",
-                "col": "F.col('C_TAX_FLAG').cast(DecimalType(38, 10))"
+                "col": "F.col('C_TAX_FLAG').cast(T.DecimalType(38, 0))"
               }
             },
             {
               "op": "withColumn",
               "args": {
                 "colName": "C_TAX_RATE",
-                "col": "F.col('C_TAX_RATE').cast(DecimalType(38, 10))"
+                "col": "F.col('C_TAX_RATE').cast(T.DecimalType(38, 10))"
               }
             },
             {
               "op": "withColumn",
               "args": {
                 "colName": "C_DEAL_STATUS",
-                "col": "F.col('C_DEAL_STATUS').cast(DecimalType(38, 10))"
+                "col": "F.col('C_DEAL_STATUS').cast(T.DecimalType(38, 0))"
               }
             },
             {
               "op": "withColumn",
               "args": {
                 "colName": "C_CARE_RATE",
-                "col": "F.col('C_CARE_RATE').cast(DecimalType(38, 10))"
+                "col": "F.col('C_CARE_RATE').cast(T.DecimalType(38, 10))"
               }
             },
             {
@@ -103,14 +103,14 @@
     },
     "load": {
         "T_BACK_DEAL_HISTORY": {
-            "table_name": "spark_catalog.bronze.T_BACK_DEAL_HISTORY",
+            "table_name": "spark_catalog.bronze.daily_load_T_BACK_DEAL_HISTORY",
             "writer": "DeltaWriter",
-            "mode": "append",
+            "mode": "overwrite",
             "format": "delta",
             "partition_by": [
                 "etl_date"
             ],
-            "path": "s3a://warehouse/bronze/T_BACK_DEAL_HISTORY"
+            "path": "s3a://warehouse/bronze/daily_load_T_BACK_DEAL_HISTORY"
         }
     }
 }

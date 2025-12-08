@@ -7,7 +7,7 @@
     },
     "extract": {
         "V_T_ERC_MONTHLY_DETAIL": {
-            "table": "MISUSER.V_T_ERC_MONTHLY_DETAIL",
+            "table": "(SELECT * FROM MISUSER.V_T_ERC_MONTHLY_DETAIL WHERE C_YEAR = EXTRACT(YEAR FROM ADD_MONTHS(SYSDATE, -1)) AND C_MONTH = EXTRACT(MONTH FROM ADD_MONTHS(SYSDATE, -1))) tbl",
             "url": "jdbc:oracle:thin:@10.91.101.161:1521/tradingnkt",
             "properties": {
                 "user": "mispoc",
@@ -25,14 +25,14 @@
               "op": "withColumn",
               "args": {
                 "colName": "partition_year",
-                "col": "F.to_date(F.col('C_YEAR'))"
+                "col": "F.col('C_YEAR').cast(T.StringType())"
               }
             },
             {
               "op": "withColumn",
               "args": {
                 "colName": "partition_month",
-                "col": "F.to_date(F.col('C_MONTH'))"
+                "col": "F.col('C_MONTH').cast(T.StringType())"
               }
             },
             {
@@ -49,7 +49,8 @@
         "V_T_ERC_MONTHLY_DETAIL": {
             "table_name": "spark_catalog.bronze.V_T_ERC_MONTHLY_DETAIL",
             "writer": "DeltaWriter",
-            "mode": "append",
+            "mode": "overwrite",
+            "first": true,
             "format": "delta",
             "partition_by": [
                 "etl_date"

@@ -33,7 +33,8 @@ class JDBCReader(BaseReader):
             .option("url", self.config.get("url"))
         )
         if self.config.get("table"):
-            reader = reader.option("dbtable", self.config["table"])
+            table = self.config["table"].replace("${run_date}", str(self.run_data_date))
+            reader = reader.option("dbtable", table)
         if self.config.get("properties"):
             config = self.config.get("properties")
             for k, v in config.items():

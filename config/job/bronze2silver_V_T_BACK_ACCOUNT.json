@@ -21,6 +21,7 @@
             "table_name": "spark_catalog.silver.V_T_BACK_ACCOUNT",
             "writer": "DeltaWriter",
             "mode": "append",
+            "first": true,
             "format": "delta",
             "path": "s3a://warehouse/silver/V_T_BACK_ACCOUNT"
         }

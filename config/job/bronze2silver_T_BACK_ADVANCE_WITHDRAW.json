@@ -7,20 +7,24 @@
     },
     "extract": {
         "T_BACK_ADVANCE_WITHDRAW": {
-            "table": "spark_catalog.bronze.T_BACK_ADVANCE_WITHDRAW",
+            "query": "SELECT * FROM bronze.T_BACK_ADVANCE_WITHDRAW WHERE CAST(etl_date AS DATE) = CAST(current_timestamp() + INTERVAL 7 HOURS AS DATE)",
             "reader": "DeltaReader"
         }
     },
     "transform": {
         "transformer": "ConfigTransformer",
         "transformation": {
+            "T_BACK_ADVANCE_WITHDRAW":
+            {
+                
+            }
         }
     },
     "load": {
         "T_BACK_ADVANCE_WITHDRAW": {
             "table_name": "spark_catalog.silver.T_BACK_ADVANCE_WITHDRAW",
             "writer": "DeltaWriter",
-            "mode": "append",
+            "mode": "overwrite",
             "format": "delta",
             "partition_by": [
                 "partition_date"

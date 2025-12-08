@@ -7,7 +7,7 @@
     },
     "extract": {
         "V_T_ERC_MONTHLY_DETAIL": {
-            "table": "spark_catalog.bronze.V_T_ERC_MONTHLY_DETAIL",
+            "query": "SELECT * FROM bronze.V_T_ERC_MONTHLY_DETAIL WHERE CAST(etl_date AS DATE) = CAST(current_timestamp() + INTERVAL 7 HOURS AS DATE)",
             "reader": "DeltaReader"
         }
     },
@@ -20,7 +20,7 @@
         "V_T_ERC_MONTHLY_DETAIL": {
             "table_name": "spark_catalog.silver.V_T_ERC_MONTHLY_DETAIL",
             "writer": "DeltaWriter",
-            "mode": "append",
+            "mode": "overwrite",
             "format": "delta",
             "partition_by": [
                 "partition_year",

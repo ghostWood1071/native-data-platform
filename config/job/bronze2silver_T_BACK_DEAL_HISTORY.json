@@ -7,20 +7,28 @@
     },
     "extract": {
         "T_BACK_DEAL_HISTORY": {
-            "table": "spark_catalog.bronze.T_BACK_DEAL_HISTORY",
+            "query": "SELECT * FROM bronze.daily_load_T_BACK_DEAL_HISTORY WHERE CAST(etl_date AS DATE) = CAST(current_timestamp() + INTERVAL 7 HOURS AS DATE)",
             "reader": "DeltaReader"
         }
     },
     "transform": {
         "transformer": "ConfigTransformer",
         "transformation": {
+            "T_BACK_DEAL_HISTORY": [
+                {
+                    "op": "drop",
+                    "args": {
+                        "cols": ["etl_date"]
+                    }
+                }
+            ]
         }
     },
     "load": {
         "T_BACK_DEAL_HISTORY": {
             "table_name": "spark_catalog.silver.T_BACK_DEAL_HISTORY",
             "writer": "DeltaWriter",
-            "mode": "append",
+            "mode": "overwrite",
             "format": "delta",
             "partition_by": [
                 "partition_date"

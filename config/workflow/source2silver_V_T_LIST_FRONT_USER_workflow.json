@@ -1,7 +1,7 @@
 {
   "dag_id": "source2silver_V_T_LIST_FRONT_USER_workflow",
   "description": "source -> bronze -> silver",
-  "schedule": "",
+  "schedule": null,
   "start_date": "2025-01-01 00:00:00",
   "active": true,
   "tags": ["source2bronze", "bronze2silver"],

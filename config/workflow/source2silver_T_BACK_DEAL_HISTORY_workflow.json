@@ -42,7 +42,10 @@
             "spark.eventLog.dir": "s3a://spark-logs/events",
             "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp",
             "app.job_asset_bucket": "asset",
-            "app.job_input_path": "job-input/source2bronze_T_BACK_DEAL_HISTORY.json"
+            "app.job_input_path": "job-input/source2bronze_T_BACK_DEAL_HISTORY.json",
+            "spark.executor.instances": "2",
+            "spark.executor.cores": "8",
+            "spark.executor.memory": "8g"
         }
       }
     },
