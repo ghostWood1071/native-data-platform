@@ -1,0 +1,46 @@
+{
+    "job_id": "source2bronze_V_T_LIST_FRONT_USER",
+    "schedule": "",
+    "depend_on": "",
+    "run_mode": {
+        "name": "default"
+    },
+    "extract": {
+        "V_T_LIST_FRONT_USER": {
+            "table": "MISUSER.V_T_LIST_FRONT_USER",
+            "url": "jdbc:oracle:thin:@10.91.101.161:1521/tradingnkt",
+            "properties": {
+                "user": "mispoc",
+                "password": "d8daa822c8b0c6f9d85",
+                "driver": "oracle.jdbc.driver.OracleDriver"
+            },
+            "reader": "JDBCReader"
+        }
+    },
+    "transform": {
+        "transformer": "ConfigTransformer",
+        "transformation": {
+          "V_T_LIST_FRONT_USER": [
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "etl_date",
+                "col": "F.date_format(F.from_utc_timestamp(F.current_date(), 'Asia/Ho_Chi_Minh'), 'yyyy-MM-dd')"
+              }
+            }
+          ]
+        }
+    },
+    "load": {
+        "V_T_LIST_FRONT_USER": {
+            "table_name": "spark_catalog.bronze.V_T_LIST_FRONT_USER",
+            "writer": "DeltaWriter",
+            "mode": "append",
+            "format": "delta",
+            "partition_by": [
+                "etl_date"
+            ],
+            "path": "s3a://warehouse/bronze/V_T_LIST_FRONT_USER"
+        }
+    }
+}

@@ -1,0 +1,55 @@
+{
+    "job_id": "source2bronze_T_MARGIN_EXTRA_BALANCE_HIS",
+    "schedule": "",
+    "depend_on": "",
+    "run_mode": {
+        "name": "back_fill",
+        "start": 2008,
+        "end": 2025
+    },
+    "extract": {
+        "T_MARGIN_EXTRA_BALANCE_HIS": {
+            "table": "BACK.T_MARGIN_EXTRA_BALANCE_HIS",
+            "url": "jdbc:oracle:thin:@10.91.101.161:1521/tradingnkt",
+            "properties": {
+                "user": "mispoc",
+                "password": "d8daa822c8b0c6f9d85",
+                "driver": "oracle.jdbc.driver.OracleDriver"
+            },
+            "reader": "JDBCReader"
+        }
+    },
+    "transform": {
+        "transformer": "ConfigTransformer",
+        "transformation": {
+          "T_MARGIN_EXTRA_BALANCE_HIS": [
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "partition_date",
+                "col": "F.to_date(F.col('C_TRADING_DATE'))"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "etl_date",
+                "col": "F.date_format(F.from_utc_timestamp(F.current_date(), 'Asia/Ho_Chi_Minh'), 'yyyy-MM-dd')"
+              }
+            }
+          ]
+        }
+    },
+    "load": {
+        "T_MARGIN_EXTRA_BALANCE_HIS": {
+            "table_name": "spark_catalog.bronze.T_MARGIN_EXTRA_BALANCE_HIS",
+            "writer": "DeltaWriter",
+            "mode": "append",
+            "format": "delta",
+            "partition_by": [
+                "etl_date"
+            ],
+            "path": "s3a://warehouse/bronze/T_MARGIN_EXTRA_BALANCE_HIS"
+        }
+    }
+}

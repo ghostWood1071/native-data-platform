@@ -1,0 +1,53 @@
+{
+    "job_id": "source2bronze_T_BACK_ADVANCE_WITHDRAW",
+    "schedule": "",
+    "depend_on": "",
+    "run_mode": {
+        "name": "default"
+    },
+    "extract": {
+        "T_BACK_ADVANCE_WITHDRAW": {
+            "table": "BACK.T_BACK_ADVANCE_WITHDRAW",
+            "url": "jdbc:oracle:thin:@10.91.101.161:1521/tradingnkt",
+            "properties": {
+                "user": "mispoc",
+                "password": "d8daa822c8b0c6f9d85",
+                "driver": "oracle.jdbc.driver.OracleDriver"
+            },
+            "reader": "JDBCReader"
+        }
+    },
+    "transform": {
+        "transformer": "ConfigTransformer",
+        "transformation": {
+          "T_BACK_ADVANCE_WITHDRAW": [
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "partition_date",
+                "col": "F.to_date(F.col('C_APPROVE_TIME'))"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "etl_date",
+                "col": "F.date_format(F.from_utc_timestamp(F.date_format(F.from_utc_timestamp(F.current_date(), 'Asia/Ho_Chi_Minh'), 'yyyy-MM-dd'), 'Asia/Ho_Chi_Minh'), 'yyyy-MM-dd')"
+              }
+            }
+          ]
+        }
+    },
+    "load": {
+        "T_BACK_ADVANCE_WITHDRAW": {
+            "table_name": "spark_catalog.bronze.T_BACK_ADVANCE_WITHDRAW",
+            "writer": "DeltaWriter",
+            "mode": "append",
+            "format": "delta",
+            "partition_by": [
+                "etl_date"
+            ],
+            "path": "s3a://warehouse/bronze/T_BACK_ADVANCE_WITHDRAW"
+        }
+    }
+}

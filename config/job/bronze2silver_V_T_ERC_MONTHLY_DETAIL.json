@@ -1,0 +1,32 @@
+{
+    "job_id": "bronze2silver_V_T_ERC_MONTHLY_DETAIL",
+    "schedule": "",
+    "depend_on": ["source2bronze_V_T_ERC_MONTHLY_DETAIL"],
+    "run_mode": {
+        "name": "default"
+    },
+    "extract": {
+        "V_T_ERC_MONTHLY_DETAIL": {
+            "table": "spark_catalog.bronze.V_T_ERC_MONTHLY_DETAIL",
+            "reader": "DeltaReader"
+        }
+    },
+    "transform": {
+        "transformer": "ConfigTransformer",
+        "transformation": {
+        }
+    },
+    "load": {
+        "V_T_ERC_MONTHLY_DETAIL": {
+            "table_name": "spark_catalog.silver.V_T_ERC_MONTHLY_DETAIL",
+            "writer": "DeltaWriter",
+            "mode": "append",
+            "format": "delta",
+            "partition_by": [
+                "partition_year",
+                "partition_month"
+            ],
+            "path": "s3a://warehouse/silver/V_T_ERC_MONTHLY_DETAIL"
+        }
+    }
+}

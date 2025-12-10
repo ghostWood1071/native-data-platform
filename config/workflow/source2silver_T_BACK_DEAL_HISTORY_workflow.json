@@ -1,0 +1,85 @@
+{
+  "dag_id": "source2silver_T_BACK_DEAL_HISTORY_workflow",
+  "description": "source -> bronze -> silver",
+  "schedule": "0 18 * * *",
+  "start_date": "2025-01-01 00:00:00",
+  "active": true,
+  "tags": ["source2bronze", "bronze2silver"],
+  "default_args": {
+    "owner": "cmc_team",
+    "email": ["dqthinh1@cmcglobal.vn"],
+    "retries": 2,
+    "retry_delay": "300"
+  },
+  "tasks": [
+    {
+      "task_id": "source2bronze_T_BACK_DEAL_HISTORY",
+      "task_type": "spark",
+      "conn_id": "spark_k8s",
+      "task_params": {
+        "application": "s3a://asset/spark-jobs/entry_point.py",
+        "name": "source2bronze_T_BACK_DEAL_HISTORY",
+        "application_args": [
+          "--job_asset_bucket", "asset",
+          "--job_input_path", "job-input/source2bronze_T_BACK_DEAL_HISTORY.json"
+        ],
+        "conf": {
+            "spark.kubernetes.namespace": "compute",
+            "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf",
+            "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
+            "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+            "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+            "spark.sql.catalogImplementation": "hive",
+            "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083",
+            "spark.sql.warehouse.dir": "s3a://warehouse/",
+            "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000",
+            "spark.hadoop.fs.s3a.access.key": "minioadmin",
+            "spark.hadoop.fs.s3a.secret.key": "minio@demo!",
+            "spark.hadoop.fs.s3a.path.style.access": "true",
+            "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+            "spark.sql.sources.partitionOverwriteMode": "dynamic",
+            "spark.eventLog.enabled": true,
+            "spark.eventLog.dir": "s3a://spark-logs/events",
+            "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp",
+            "app.job_asset_bucket": "asset",
+            "app.job_input_path": "job-input/source2bronze_T_BACK_DEAL_HISTORY.json"
+        }
+      }
+    },
+    {
+      "task_id": "bronze2silver_T_BACK_DEAL_HISTORY",
+      "task_type": "spark",
+      "conn_id": "spark_k8s",
+      "depend_on": ["source2bronze_T_BACK_DEAL_HISTORY"],
+      "task_params": {
+        "application": "s3a://asset/spark-jobs/entry_point.py",
+        "name": "bronze2silver_T_BACK_DEAL_HISTORY",
+        "application_args": [
+          "--job_asset_bucket", "asset",
+          "--job_input_path", "job-input/bronze2silver_T_BACK_DEAL_HISTORY.json"
+        ],
+        "conf": {
+          "spark.kubernetes.namespace": "compute",
+            "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf",
+            "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
+            "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+            "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+            "spark.sql.catalogImplementation": "hive",
+            "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083",
+            "spark.sql.warehouse.dir": "s3a://warehouse/",
+            "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000",
+            "spark.hadoop.fs.s3a.access.key": "minioadmin",
+            "spark.hadoop.fs.s3a.secret.key": "minio@demo!",
+            "spark.hadoop.fs.s3a.path.style.access": "true",
+            "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+            "spark.sql.sources.partitionOverwriteMode": "dynamic",
+            "spark.eventLog.enabled": true,
+            "spark.eventLog.dir": "s3a://spark-logs/events",
+            "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp",
+            "app.job_asset_bucket": "asset",
+            "app.job_input_path": "job-input/bronze2silver_T_BACK_DEAL_HISTORY.json"
+        }
+      }
+    }
+  ]
+}

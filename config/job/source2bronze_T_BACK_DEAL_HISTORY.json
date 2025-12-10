@@ -1,0 +1,116 @@
+{
+    "job_id": "source2bronze_T_BACK_DEAL_HISTORY",
+    "schedule": "",
+    "depend_on": "",
+    "run_mode": {
+        "name": "default"
+    },
+    "extract": {
+        "T_BACK_DEAL_HISTORY": {
+            "table": "BACK.T_BACK_DEAL_HISTORY",
+            "url": "jdbc:oracle:thin:@10.91.101.161:1521/tradingnkt",
+            "properties": {
+                "user": "mispoc",
+                "password": "d8daa822c8b0c6f9d85",
+                "driver": "oracle.jdbc.driver.OracleDriver"
+            },
+            "reader": "JDBCReader"
+        }
+    },
+    "transform": {
+        "transformer": "ConfigTransformer",
+        "transformation": {
+          "T_BACK_DEAL_HISTORY": [
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "partition_date",
+                "col": "F.to_date(F.col('C_TRANSACTION_DATE'))"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "C_ORDER_NO",
+                "col": "F.col('C_ORDER_NO').cast(DecimalType(38, 10))"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "C_SUB_ORDER_NO",
+                "col": "F.col('C_SUB_ORDER_NO').cast(DecimalType(38, 10))"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "C_MATCHED_VOLUME",
+                "col": "F.col('C_MATCHED_VOLUME').cast(DecimalType(38, 10))"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "C_MATCHED_PRICE",
+                "col": "F.col('C_MATCHED_PRICE').cast(DecimalType(38, 10))"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "C_COMM_RATE",
+                "col": "F.col('C_COMM_RATE').cast(DecimalType(38, 10))"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "C_TAX_FLAG",
+                "col": "F.col('C_TAX_FLAG').cast(DecimalType(38, 10))"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "C_TAX_RATE",
+                "col": "F.col('C_TAX_RATE').cast(DecimalType(38, 10))"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "C_DEAL_STATUS",
+                "col": "F.col('C_DEAL_STATUS').cast(DecimalType(38, 10))"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "C_CARE_RATE",
+                "col": "F.col('C_CARE_RATE').cast(DecimalType(38, 10))"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "etl_date",
+                "col": "F.date_format(F.from_utc_timestamp(F.current_date(), 'Asia/Ho_Chi_Minh'), 'yyyy-MM-dd')"
+              }
+            }
+          ]
+        }
+    },
+    "load": {
+        "T_BACK_DEAL_HISTORY": {
+            "table_name": "spark_catalog.bronze.T_BACK_DEAL_HISTORY",
+            "writer": "DeltaWriter",
+            "mode": "append",
+            "format": "delta",
+            "partition_by": [
+                "etl_date"
+            ],
+            "path": "s3a://warehouse/bronze/T_BACK_DEAL_HISTORY"
+        }
+    }
+}

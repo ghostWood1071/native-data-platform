@@ -1,0 +1,28 @@
+{
+    "job_id": "bronze2silver_V_T_LIST_FRONT_USER",
+    "schedule": "",
+    "depend_on": ["source2bronze_V_T_LIST_FRONT_USER"],
+    "run_mode": {
+        "name": "default"
+    },
+    "extract": {
+        "V_T_LIST_FRONT_USER": {
+            "table": "spark_catalog.bronze.V_T_LIST_FRONT_USER",
+            "reader": "DeltaReader"
+        }
+    },
+    "transform": {
+        "transformer": "ConfigTransformer",
+        "transformation": {
+        }
+    },
+    "load": {
+        "V_T_LIST_FRONT_USER": {
+            "table_name": "spark_catalog.silver.V_T_LIST_FRONT_USER",
+            "writer": "DeltaWriter",
+            "mode": "append",
+            "format": "delta",
+            "path": "s3a://warehouse/silver/V_T_LIST_FRONT_USER"
+        }
+    }
+}
