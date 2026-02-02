@@ -1,0 +1,37 @@
+{
+    "job_id": "bronze2silver_src_customer_segment_monthly",
+    "schedule": "",
+    "depend_on": ["source2bronze_src_customer_segment_monthly"],
+    "run_mode": {
+        "name": "default"
+    },
+    "extract": {
+        "src_customer_segment_monthly": {
+            "query": "SELECT * FROM bronze.src_customer_segment_monthly WHERE CAST(etl_date AS DATE) = CAST(current_timestamp() + INTERVAL 7 HOURS AS DATE)",
+            "reader": "DeltaReader"
+        }
+    },
+    "transform": {
+        "transformer": "ConfigTransformer",
+        "transformation": {
+            "src_customer_segment_monthly": 
+            {
+                
+            }
+        }
+    },
+    "load": {
+        "src_customer_segment_monthly": {
+            "table_name": "spark_catalog.silver.src_customer_segment_monthly",
+            "writer": "DeltaWriter",
+            "mode": "upsert",
+            "format": "delta",
+            "first": true,
+            "partition_by": [
+                "etl_date"
+            ],
+            "path": "s3a://warehouse/silver/src_customer_segment_monthly",
+            "primary_key": ["customer_id", "asof_ts_local"]
+        }
+    }
+}

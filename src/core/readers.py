@@ -42,3 +42,15 @@ class JDBCReader(BaseReader):
         if self.config.get("query"):
             reader = reader.option("query", self.config["query"])
         return reader.load()
+    
+class KafkaReader(BaseReader):
+    def load(self) -> DataFrame:
+        reader  = (
+            self.spark.readStream
+            .format("kafka")
+            .option("kafka.bootstrap.servers", "kafka-broker.streaming.svc.cluster.local:9092") \
+            .option("subscribe", "demo.public.dim_index")
+            .option("startingOffsets", "earliest")
+            .load()
+        )
+        reader.awaitTermination()

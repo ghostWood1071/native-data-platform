@@ -1,10 +1,255 @@
---kubectl get pod -n orchestration
---kubectl exec -it <postgres-db> -n orchestration -- psql -U postgres -d airflow -W
 
-        TRUNCATE TABLE etl_dependency RESTART IDENTITY;
-        TRUNCATE TABLE etl_task RESTART IDENTITY;
-        TRUNCATE TABLE etl_dag RESTART IDENTITY;
-
+       INSERT INTO etl_dag (dag_id, description, schedule_interval, start_date, is_active, tags, default_args)
+       VALUES (
+                  'source2gold_customer_test_workflow',
+                  'source -> gold',
+                  NULL,
+                  '2025-01-01 00:00:00',
+                  true,
+                  ARRAY['source2gold'],
+                  '{"owner": "cmc_team", "email": ["dqthinh1@cmcglobal.vn"], "retries": 0, "retry_delay": "300"}'::jsonb
+              );
+    
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2gold_customer_test_workflow',
+                   'source2gold_customer_test',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "source2gold_customer_test", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/source2gold_customer_test.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "", "spark.hadoop.fs.s3a.secret.key": "", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/source2gold_customer_test.json", "spark.sql.session.timeZone": "Asia/Ho_Chi_Minh"}}'::jsonb
+               );
+        
+       INSERT INTO etl_dag (dag_id, description, schedule_interval, start_date, is_active, tags, default_args)
+       VALUES (
+                  'source2silver_customer_workflow',
+                  'source -> silver',
+                  NULL,
+                  '2025-01-01 00:00:00',
+                  true,
+                  ARRAY['source2bronze'],
+                  '{"owner": "cmc_team", "email": ["dqthinh1@cmcglobal.vn"], "retries": 0, "retry_delay": "300"}'::jsonb
+              );
+    
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2silver_customer_workflow',
+                   'source2bronze_customer',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "source2bronze_customer", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/source2bronze_customer.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/source2bronze_customer.json"}}'::jsonb
+               );
+        
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2silver_customer_workflow',
+                   'bronze2silver_customer',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "bronze2silver_customer", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/bronze2silver_customer.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/bronze2silver_customer.json"}}'::jsonb
+               );
+        
+        INSERT INTO etl_dependency (dag_id, upstream_task_id, downstream_task_id)
+        VALUES
+            ('source2silver_customer_workflow', 'source2bronze_customer', 'bronze2silver_customer');
+    
+       INSERT INTO etl_dag (dag_id, description, schedule_interval, start_date, is_active, tags, default_args)
+       VALUES (
+                  'source2silver_customer_test_workflow',
+                  'source -> silver',
+                  NULL,
+                  '2025-01-01 00:00:00',
+                  true,
+                  ARRAY['source2bronze'],
+                  '{"owner": "cmc_team", "email": ["dqthinh1@cmcglobal.vn"], "retries": 0, "retry_delay": "300"}'::jsonb
+              );
+    
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2silver_customer_test_workflow',
+                   'source2bronze_customer_test',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "source2bronze_customer_test", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/source2bronze_customer_test.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/source2bronze_customer_test.json"}}'::jsonb
+               );
+        
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2silver_customer_test_workflow',
+                   'bronze2silver_customer_test',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "bronze2silver_customer_test", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/bronze2silver_customer_test.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/bronze2silver_customer_test.json"}}'::jsonb
+               );
+        
+        INSERT INTO etl_dependency (dag_id, upstream_task_id, downstream_task_id)
+        VALUES
+            ('source2silver_customer_test_workflow', 'source2bronze_customer_test', 'bronze2silver_customer_test');
+    
+       INSERT INTO etl_dag (dag_id, description, schedule_interval, start_date, is_active, tags, default_args)
+       VALUES (
+                  'source2silver_src_customer_segment_monthly_workflow',
+                  'source -> silver',
+                  NULL,
+                  '2025-01-01 00:00:00',
+                  true,
+                  ARRAY['source2bronze'],
+                  '{"owner": "cmc_team", "email": ["dqthinh1@cmcglobal.vn"], "retries": 0, "retry_delay": "300"}'::jsonb
+              );
+    
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2silver_src_customer_segment_monthly_workflow',
+                   'source2bronze_src_customer_segment_monthly',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "source2bronze_src_customer_segment_monthly", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/source2bronze_src_customer_segment_monthly.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/source2bronze_src_customer_segment_monthly.json"}}'::jsonb
+               );
+        
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2silver_src_customer_segment_monthly_workflow',
+                   'bronze2silver_src_customer_segment_monthly',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "bronze2silver_src_customer_segment_monthly", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/bronze2silver_src_customer_segment_monthly.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/bronze2silver_src_customer_segment_monthly.json"}}'::jsonb
+               );
+        
+        INSERT INTO etl_dependency (dag_id, upstream_task_id, downstream_task_id)
+        VALUES
+            ('source2silver_src_customer_segment_monthly_workflow', 'source2bronze_src_customer_segment_monthly', 'bronze2silver_src_customer_segment_monthly');
+    
+       INSERT INTO etl_dag (dag_id, description, schedule_interval, start_date, is_active, tags, default_args)
+       VALUES (
+                  'source2silver_src_index_5min_workflow',
+                  'source -> silver',
+                  NULL,
+                  '2025-01-01 00:00:00',
+                  true,
+                  ARRAY['source2bronze'],
+                  '{"owner": "cmc_team", "email": ["dqthinh1@cmcglobal.vn"], "retries": 0, "retry_delay": "300"}'::jsonb
+              );
+    
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2silver_src_index_5min_workflow',
+                   'source2bronze_src_index_5min',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "source2bronze_src_index_5min", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/source2bronze_src_index_5min.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/source2bronze_src_index_5min.json"}}'::jsonb
+               );
+        
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2silver_src_index_5min_workflow',
+                   'bronze2silver_src_index_5min',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "bronze2silver_src_index_5min", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/bronze2silver_src_index_5min.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/bronze2silver_src_index_5min.json"}}'::jsonb
+               );
+        
+        INSERT INTO etl_dependency (dag_id, upstream_task_id, downstream_task_id)
+        VALUES
+            ('source2silver_src_index_5min_workflow', 'source2bronze_src_index_5min', 'bronze2silver_src_index_5min');
+    
+       INSERT INTO etl_dag (dag_id, description, schedule_interval, start_date, is_active, tags, default_args)
+       VALUES (
+                  'source2silver_src_market_cap_daily_workflow',
+                  'source -> silver',
+                  NULL,
+                  '2025-01-01 00:00:00',
+                  true,
+                  ARRAY['source2bronze'],
+                  '{"owner": "cmc_team", "email": ["dqthinh1@cmcglobal.vn"], "retries": 0, "retry_delay": "300"}'::jsonb
+              );
+    
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2silver_src_market_cap_daily_workflow',
+                   'source2bronze_src_market_cap_daily',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "source2bronze_src_market_cap_daily", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/source2bronze_src_market_cap_daily.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/source2bronze_src_market_cap_daily.json"}}'::jsonb
+               );
+        
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2silver_src_market_cap_daily_workflow',
+                   'bronze2silver_src_market_cap_daily',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "bronze2silver_src_market_cap_daily", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/bronze2silver_src_market_cap_daily.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/bronze2silver_src_market_cap_daily.json"}}'::jsonb
+               );
+        
+        INSERT INTO etl_dependency (dag_id, upstream_task_id, downstream_task_id)
+        VALUES
+            ('source2silver_src_market_cap_daily_workflow', 'source2bronze_src_market_cap_daily', 'bronze2silver_src_market_cap_daily');
+    
+       INSERT INTO etl_dag (dag_id, description, schedule_interval, start_date, is_active, tags, default_args)
+       VALUES (
+                  'source2silver_src_stock_5min_workflow',
+                  'source -> silver',
+                  NULL,
+                  '2025-01-01 00:00:00',
+                  true,
+                  ARRAY['source2bronze'],
+                  '{"owner": "cmc_team", "email": ["dqthinh1@cmcglobal.vn"], "retries": 0, "retry_delay": "300"}'::jsonb
+              );
+    
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2silver_src_stock_5min_workflow',
+                   'source2bronze_src_stock_5min',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "source2bronze_src_stock_5min", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/source2bronze_src_stock_5min.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/source2bronze_src_stock_5min.json"}}'::jsonb
+               );
+        
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2silver_src_stock_5min_workflow',
+                   'bronze2silver_src_stock_5min',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "bronze2silver_src_stock_5min", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/bronze2silver_src_stock_5min.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/bronze2silver_src_stock_5min.json"}}'::jsonb
+               );
+        
+        INSERT INTO etl_dependency (dag_id, upstream_task_id, downstream_task_id)
+        VALUES
+            ('source2silver_src_stock_5min_workflow', 'source2bronze_src_stock_5min', 'bronze2silver_src_stock_5min');
+    
+       INSERT INTO etl_dag (dag_id, description, schedule_interval, start_date, is_active, tags, default_args)
+       VALUES (
+                  'source2silver_src_txn_event_workflow',
+                  'source -> silver',
+                  NULL,
+                  '2025-01-01 00:00:00',
+                  true,
+                  ARRAY['source2bronze'],
+                  '{"owner": "cmc_team", "email": ["dqthinh1@cmcglobal.vn"], "retries": 0, "retry_delay": "300"}'::jsonb
+              );
+    
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2silver_src_txn_event_workflow',
+                   'source2bronze_src_txn_event',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "source2bronze_src_txn_event", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/source2bronze_src_txn_event.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/source2bronze_src_txn_event.json"}}'::jsonb
+               );
+        
+        INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
+        VALUES (
+                   'source2silver_src_txn_event_workflow',
+                   'bronze2silver_src_txn_event',
+                   'spark_k8s',
+                   'spark',
+                   '{"application": "s3a://asset/spark-jobs/entry_point.py", "name": "bronze2silver_src_txn_event", "application_args": ["--job_asset_bucket", "asset", "--job_input_path", "job-input/bronze2silver_src_txn_event.json"], "conf": {"spark.kubernetes.namespace": "compute", "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf", "spark.kubernetes.authenticate.driver.serviceAccountName": "spark", "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension", "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog", "spark.sql.catalogImplementation": "hive", "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083", "spark.sql.warehouse.dir": "s3a://warehouse/", "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000", "spark.hadoop.fs.s3a.access.key": "minioadmin", "spark.hadoop.fs.s3a.secret.key": "minio@demo!", "spark.hadoop.fs.s3a.path.style.access": "true", "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem", "spark.sql.sources.partitionOverwriteMode": "dynamic", "spark.eventLog.enabled": true, "spark.eventLog.dir": "s3a://spark-logs/events", "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp", "app.job_asset_bucket": "asset", "app.job_input_path": "job-input/bronze2silver_src_txn_event.json"}}'::jsonb
+               );
+        
+        INSERT INTO etl_dependency (dag_id, upstream_task_id, downstream_task_id)
+        VALUES
+            ('source2silver_src_txn_event_workflow', 'source2bronze_src_txn_event', 'bronze2silver_src_txn_event');
+    
        INSERT INTO etl_dag (dag_id, description, schedule_interval, start_date, is_active, tags, default_args)
        VALUES (
                   'source2silver_T_BACK_ADVANCE_WITHDRAW_workflow',

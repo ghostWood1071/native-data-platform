@@ -37,12 +37,13 @@ def truncate_all(db):
 
 
 def get_insert_dags_cmd(dag_id, description, schedule_interval, start_date, is_active, tags, default_args):
+    schedule_interval = 'NULL' if schedule_interval is None else f"'{schedule_interval}'" 
     return f"""
        INSERT INTO etl_dag (dag_id, description, schedule_interval, start_date, is_active, tags, default_args)
        VALUES (
                   '{dag_id}',
                   '{description}',
-                  '{schedule_interval}',
+                  {schedule_interval},
                   '{start_date}',
                   {str(is_active).lower()},
                   ARRAY{str(tags)},

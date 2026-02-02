@@ -1,0 +1,52 @@
+{
+  "dag_id": "source2gold_customer_test_workflow",
+  "description": "source -> gold",
+  "schedule": null,
+  "start_date": "2025-01-01 00:00:00",
+  "active": true,
+  "tags": ["source2gold"],
+  "default_args": {
+    "owner": "cmc_team",
+    "email": ["dqthinh1@cmcglobal.vn"],
+    "retries": 0,
+    "retry_delay": "300"
+  },
+  "tasks": [
+    {
+      "task_id": "source2gold_customer_test",
+      "task_type": "spark",
+      "conn_id": "spark_k8s",
+      "task_params": {
+        "application": "s3a://asset/spark-jobs/entry_point.py",
+        "name": "source2gold_customer_test",
+
+        "application_args": [
+          "--job_asset_bucket", "asset",
+          "--job_input_path", "job-input/source2gold_customer_test.json"
+        ],
+        "conf": {
+            "spark.kubernetes.namespace": "compute",
+            "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf",
+            "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
+            "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+            "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+            "spark.sql.catalogImplementation": "hive",
+            "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083",
+            "spark.sql.warehouse.dir": "s3a://warehouse/",
+            "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000",
+            "spark.hadoop.fs.s3a.access.key": "",
+            "spark.hadoop.fs.s3a.secret.key": "",
+            "spark.hadoop.fs.s3a.path.style.access": "true",
+            "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+            "spark.sql.sources.partitionOverwriteMode": "dynamic",
+            "spark.eventLog.enabled": true,
+            "spark.eventLog.dir": "s3a://spark-logs/events",
+            "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp",
+            "app.job_asset_bucket": "asset",
+            "app.job_input_path": "job-input/source2gold_customer_test.json",
+            "spark.sql.session.timeZone": "Asia/Ho_Chi_Minh"
+        }
+      }
+    }
+  ]
+}

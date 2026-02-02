@@ -1,28 +1,28 @@
 {
-  "dag_id": "source2silver_T_MARGIN_EXTRA_BALANCE_HIS_workflow",
-  "description": "source -> bronze -> silver",
-  "schedule": "0 18 * * *",
+  "dag_id": "source2silver_customer_test_workflow",
+  "description": "source -> silver",
+  "schedule": null,
   "start_date": "2025-01-01 00:00:00",
   "active": true,
-  "tags": ["source2bronze", "bronze2silver"],
+  "tags": ["source2bronze"],
   "default_args": {
     "owner": "cmc_team",
     "email": ["dqthinh1@cmcglobal.vn"],
-    "retries": 2,
+    "retries": 0,
     "retry_delay": "300"
   },
   "tasks": [
     {
-      "task_id": "source2bronze_T_MARGIN_EXTRA_BALANCE_HIS",
+      "task_id": "source2bronze_customer_test",
       "task_type": "spark",
       "conn_id": "spark_k8s",
       "task_params": {
         "application": "s3a://asset/spark-jobs/entry_point.py",
-        "name": "source2bronze_T_MARGIN_EXTRA_BALANCE_HIS",
-        
+        "name": "source2bronze_customer_test",
+
         "application_args": [
           "--job_asset_bucket", "asset",
-          "--job_input_path", "job-input/source2bronze_T_MARGIN_EXTRA_BALANCE_HIS.json"
+          "--job_input_path", "job-input/source2bronze_customer_test.json"
         ],
         "conf": {
             "spark.kubernetes.namespace": "compute",
@@ -43,25 +43,25 @@
             "spark.eventLog.dir": "s3a://spark-logs/events",
             "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp",
             "app.job_asset_bucket": "asset",
-            "app.job_input_path": "job-input/source2bronze_T_MARGIN_EXTRA_BALANCE_HIS.json"
+            "app.job_input_path": "job-input/source2bronze_customer_test.json"
         }
       }
     },
     {
-      "task_id": "bronze2silver_T_MARGIN_EXTRA_BALANCE_HIS",
+      "task_id": "bronze2silver_customer_test",
       "task_type": "spark",
       "conn_id": "spark_k8s",
-      "depend_on": ["source2bronze_T_MARGIN_EXTRA_BALANCE_HIS"],
+      "depend_on": ["source2bronze_customer_test"],
       "task_params": {
         "application": "s3a://asset/spark-jobs/entry_point.py",
-        "name": "bronze2silver_T_MARGIN_EXTRA_BALANCE_HIS",
-        
+        "name": "bronze2silver_customer_test",
+
         "application_args": [
           "--job_asset_bucket", "asset",
-          "--job_input_path", "job-input/bronze2silver_T_MARGIN_EXTRA_BALANCE_HIS.json"
+          "--job_input_path", "job-input/bronze2silver_customer_test.json"
         ],
         "conf": {
-          "spark.kubernetes.namespace": "compute",
+            "spark.kubernetes.namespace": "compute",
             "spark.kubernetes.container.image": "ghostwood/mbs-spark:1.0.7-protobuf",
             "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
             "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
@@ -79,7 +79,7 @@
             "spark.eventLog.dir": "s3a://spark-logs/events",
             "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp",
             "app.job_asset_bucket": "asset",
-            "app.job_input_path": "job-input/bronze2silver_T_MARGIN_EXTRA_BALANCE_HIS.json"
+            "app.job_input_path": "job-input/bronze2silver_customer_test.json"
         }
       }
     }

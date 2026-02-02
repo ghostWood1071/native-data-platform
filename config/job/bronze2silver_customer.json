@@ -1,0 +1,37 @@
+{
+    "job_id": "bronze2silver_customer",
+    "schedule": "",
+    "depend_on": ["source2bronze_customer"],
+    "run_mode": {
+        "name": "default"
+    },
+    "extract": {
+        "customer": {
+            "query": "SELECT * FROM bronze.customer WHERE CAST(etl_date AS DATE) = CAST(current_timestamp() + INTERVAL 7 HOURS AS DATE)",
+            "reader": "DeltaReader"
+        }
+    },
+    "transform": {
+        "transformer": "ConfigTransformer",
+        "transformation": {
+            "customer":
+            {
+                
+            }
+        }
+    },
+    "load": {
+        "customer": {
+            "table_name": "spark_catalog.silver.customer",
+            "writer": "DeltaWriter",
+            "mode": "upsert",
+            "format": "delta",
+            "first": true,
+            "partition_by": [
+                "etl_date"
+            ],
+            "path": "s3a://warehouse/silver/customer",
+            "primary_key": ["customer_id", "account_id"]
+        }
+    }
+}

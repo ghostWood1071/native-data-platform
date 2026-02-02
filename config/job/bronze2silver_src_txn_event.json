@@ -1,0 +1,37 @@
+{
+    "job_id": "bronze2silver_src_txn_event",
+    "schedule": "",
+    "depend_on": ["source2bronze_src_txn_event"],
+    "run_mode": {
+        "name": "default"
+    },
+    "extract": {
+        "src_txn_event": {
+            "query": "SELECT * FROM bronze.src_txn_event WHERE CAST(etl_date AS DATE) = CAST(current_timestamp() + INTERVAL 7 HOURS AS DATE)",
+            "reader": "DeltaReader"
+        }
+    },
+    "transform": {
+        "transformer": "ConfigTransformer",
+        "transformation": {
+            "src_txn_event":
+            {
+                
+            }
+        }
+    },
+    "load": {
+        "src_txn_event": {
+            "table_name": "spark_catalog.silver.src_txn_event",
+            "writer": "DeltaWriter",
+            "mode": "upsert",
+            "format": "delta",
+            "first": true,
+            "partition_by": [
+                "etl_date"
+            ],
+            "path": "s3a://warehouse/silver/src_txn_event",
+            "primary_key": ["event_id", "event_ts_local"]
+        }
+    }
+}

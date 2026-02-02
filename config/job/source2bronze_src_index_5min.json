@@ -1,0 +1,68 @@
+{
+    "job_id": "source2bronze_src_index_5min",
+    "schedule": "",
+    "depend_on": "",
+    "run_mode": {
+        "name": "default"
+    },
+    "extract": {
+        "src_index_5min": {
+            "table": "src_index_5min",
+            "url": "jdbc:postgresql://postgresdb.streaming.svc.cluster.local:5432/demo",
+            "properties": {
+                "user": "postgres",
+                "password": "postgres",
+                "driver": "org.postgresql.Driver"
+            },
+            "reader": "JDBCReader"
+        }
+    },
+    "transform": {
+        "transformer": "ConfigTransformer",
+        "transformation": {
+          "src_index_5min": [
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "etl_date",
+                "col": "F.date_format(F.from_utc_timestamp(F.current_timestamp(), 'Asia/Ho_Chi_Minh'), 'yyyy-MM-dd')"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "op",
+                "col": "F.lit('c')"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "created_at",
+                "col": "F.from_utc_timestamp(F.current_timestamp(), 'Asia/Ho_Chi_Minh')"
+              }
+            },
+            {
+              "op": "withColumn",
+              "args": {
+                "colName": "updated_at",
+                "col": "F.from_utc_timestamp(F.current_timestamp(), 'Asia/Ho_Chi_Minh')"
+              }
+            }
+          ]
+        }
+    },
+    "load": {
+        "src_index_5min": {
+            "table_name": "spark_catalog.bronze.src_index_5min",
+            "writer": "DeltaWriter",
+            "mode": "append",
+            "first": true,
+            "format": "delta",
+            "partition_by": [
+                "etl_date"
+            ],
+            "path": "s3a://warehouse/bronze/src_index_5min"
+        }
+    }
+}

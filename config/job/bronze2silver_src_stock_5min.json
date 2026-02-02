@@ -1,0 +1,37 @@
+{
+    "job_id": "bronze2silver_src_stock_5min",
+    "schedule": "",
+    "depend_on": ["source2bronze_src_stock_5min"],
+    "run_mode": {
+        "name": "default"
+    },
+    "extract": {
+        "src_stock_5min": {
+            "query": "SELECT * FROM bronze.src_stock_5min WHERE CAST(etl_date AS DATE) = CAST(current_timestamp() + INTERVAL 7 HOURS AS DATE)",
+            "reader": "DeltaReader"
+        }
+    },
+    "transform": {
+        "transformer": "ConfigTransformer",
+        "transformation": {
+            "src_stock_5min": 
+            {
+                
+            }
+        }
+    },
+    "load": {
+        "src_stock_5min": {
+            "table_name": "spark_catalog.silver.src_stock_5min",
+            "writer": "DeltaWriter",
+            "mode": "upsert",
+            "format": "delta",
+            "first": true,
+            "partition_by": [
+                "etl_date"
+            ],
+            "path": "s3a://warehouse/silver/src_stock_5min",
+            "primary_key": ["stock_id", "bar_start_ts"]
+        }
+    }
+}
