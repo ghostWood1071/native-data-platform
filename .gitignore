@@ -3,3 +3,15 @@ infra/jars
 infra/minio-storage
 infra/pg-metastore-data
 infra/oracledb-data
+.idea
+infra/jars
+infra/minio-storage
+infra/pg-metastore-data
+infra/oracledb-data
+orchestration/logs
+*.log
+*.tmp  
+*.enc
+infra/jenkins_home
+*.xml
+*.iml
