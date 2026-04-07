@@ -1,6 +1,8 @@
 services:
   jenkins:
-    image: jenkins/jenkins:lts
+    build:
+      context: ../..
+      dockerfile: infra/jenkins/Dockerfile.jenkins
     container_name: jenkins
     restart: unless-stopped
     ports:
@@ -11,6 +13,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - jenkins-net
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
 
 networks:
   jenkins-net:
