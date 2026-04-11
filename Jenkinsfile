@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        COMPOSE_FILE = 'config/environment/docker-compose-dev.yaml'
+    }
 
     stages {
         stage('Checkout') {
@@ -23,10 +26,35 @@ pipeline {
             }
         }
 
-        stage('Validate Compose') {
+        stage('Check file Compose') {
             steps {
-                sh 'docker compose -f config/environment/docker-compose-dev.yaml config'
+                sh 'docker compose -f $COMPOSE_FILE config'
             }
+        }
+
+        stage('Check python syntex') {
+                steps {
+                    sh 'find . -name "*.py" -exec python3 -m py_compile {} \\;'
+            }
+        }
+
+        stage('Deploy environment') {
+            when {
+                branch 'tunglt'
+            }
+            steps {
+                sh 'docker compose -f $COMPOSE_FILE up -d'
+            }
+            post {
+                always {
+                    echo 'Pipeline completed'
+                }
+                success {
+                    echo 'Pipeline succeess'
+                }
+                failure {
+                    echo 'Pipeline failed'
+                }
         }
     }
 }
