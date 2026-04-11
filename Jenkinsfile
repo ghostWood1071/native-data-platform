@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     environment {
         COMPOSE_FILE = 'config/environment/docker-compose-dev.yaml'
     }
@@ -32,9 +33,9 @@ pipeline {
             }
         }
 
-        stage('Check python syntex') {
-                steps {
-                    sh 'find . -name "*.py" -exec python3 -m py_compile {} \\;'
+        stage('Check python syntax') {
+            steps {
+                sh 'find . -name "*.py" -exec python3 -m py_compile {} \\;'
             }
         }
 
@@ -50,11 +51,12 @@ pipeline {
                     echo 'Pipeline completed'
                 }
                 success {
-                    echo 'Pipeline succeess'
+                    echo 'Pipeline success'
                 }
                 failure {
                     echo 'Pipeline failed'
                 }
+            }
         }
     }
 }
