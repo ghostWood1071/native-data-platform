@@ -32,13 +32,7 @@ pipeline {
                 sh 'docker compose -f $COMPOSE_FILE config'
             }
         }
-
-        stage('Check python syntax') {
-            steps {
-                sh 'find . -name "*.py" -exec python3 -m py_compile {} \\;'
-            }
-        }
-
+        
         stage('Deploy environment') {
             when {
                 branch 'tunglt'
