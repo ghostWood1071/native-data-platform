@@ -90,6 +90,9 @@ services:
       - datanet
 
   spark-master:
+    build:
+      context: ../..
+      dockerfile: config/environment/image_spark/Dockerfile
     image: spark:3.5.6-scala2.12-java11-python3-r-ubuntu
     container_name: spark-master
     environment:
@@ -121,6 +124,9 @@ services:
       - datanet
 
   spark-worker:
+    build:
+      context: ../..
+      dockerfile: config/environment/image_spark/Dockerfile
     image: spark:3.5.6-scala2.12-java11-python3-r-ubuntu
     container_name: spark-worker
     environment:
@@ -157,6 +163,9 @@ services:
       - datanet
 
   airflow-init:
+    build:
+      context: ../..
+      dockerfile: config/environment/image_airflow/Dockerfile
     image: airflow-java
     container_name: airflow-init
     environment:
@@ -190,6 +199,9 @@ services:
       - datanet
 
   airflow-webserver:
+    build:
+      context: ../..
+      dockerfile: config/environment/image_airflow/Dockerfile
     image: airflow-java
     container_name: airflow-webserver
     environment:
@@ -225,6 +237,9 @@ services:
       - datanet
 
   airflow-scheduler:
+    build:
+      context: ../..
+      dockerfile: config/environment/image_airflow/Dockerfile
     image: airflow-java
     container_name: airflow-scheduler
     environment:
@@ -257,6 +272,9 @@ services:
       - datanet
 
   airflow-worker:
+    build:
+      context: ../..
+      dockerfile: config/environment/image_airflow/Dockerfile
     image: airflow-java
     container_name: airflow-worker
     environment:
