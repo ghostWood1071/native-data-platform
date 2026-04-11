@@ -32,11 +32,11 @@ pipeline {
                 sh 'docker compose -f $COMPOSE_FILE config'
             }
         }
-        
+
         stage('Deploy environment') {
-            when {
-                branch 'tunglt'
-            }
+            // when {
+            //     branch 'tunglt'
+            // }
             steps {
                 sh 'docker compose -f $COMPOSE_FILE up -d'
             }
