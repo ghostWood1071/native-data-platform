@@ -2,3 +2,4 @@
 infra/jars
 infra/minio-storage
 infra/pg-metastore-data
+infra/oracledb-data

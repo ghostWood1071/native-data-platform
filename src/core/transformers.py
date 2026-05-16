@@ -13,6 +13,7 @@ class PyTransformer(BaseTransformer):
 class ConfigTransformer(BaseTransformer):
     def transform(self):
         from pyspark.sql import functions as F
+        from pyspark.sql import types as T
         for table_name, source in self.config.items():
             for step in source:
                 func_name = step["op"]

@@ -1,0 +1,79 @@
+{
+  "dag_id": "source2silver_t_margin_extra_balance_his_workflow",
+  "description": "source -> bronze -> silver",
+  "schedule": "0 2 * * *",
+  "start_date": "2025-01-01 00:00:00",
+  "active": true,
+  "tags": ["source2bronze", "source2silver"],
+  "default_args": {
+    "owner": "cmc_team",
+    "email": ["dqthinh1@cmcglobal.vn"],
+    "retries": 0,
+    "retry_delay": "0"
+  },
+  "tasks": [
+    {
+      "task_id": "source2bronze_t_margin_extra_balance_his",
+      "task_type": "spark",
+      "task_params": {
+        "application": "/opt/airflow/jobs/entry_point.py",
+        "py_files": "/opt/airflow/jobs/src.zip",
+        "conn_id": "spark_conf",
+        "name": "transform_customer",
+        "application_args": [
+          "--job_asset_bucket", "asset",
+          "--job_input_path", "job-input/source2bronze_t_margin_extra_balance_his.json"
+        ],
+        "conf": {
+          "spark.databricks.delta.schema.autoMerge.enabled": "true",
+          "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+          "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+          "spark.sql.catalogImplementation": "hive",
+          "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore:9083",
+          "spark.sql.warehouse.dir": "s3a://warehouse/delta/",
+          "spark.hadoop.fs.s3a.endpoint": "http://minio:9000",
+          "spark.hadoop.fs.s3a.access.key": "minio",
+          "spark.hadoop.fs.s3a.secret.key": "minio@123",
+          "spark.hadoop.fs.s3a.path.style.access": "true",
+          "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+          "spark.sql.sources.partitionOverwriteMode": "dynamic",
+          "spark.eventLog.enabled": true,
+          "spark.eventLog.dir": "s3a://spark-logs/events",
+          "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp"
+        }
+      }
+    },
+    {
+      "task_id": "bronze2silver_t_margin_extra_balance_his",
+      "task_type": "spark",
+      "conn_id": "spark_conf",
+      "depend_on": ["source2bronze_t_margin_extra_balance_his"],
+      "task_params": {
+        "application": "/opt/airflow/jobs/entry_point.py",
+        "name": "transform_customer",
+        "py_files": "/opt/airflow/jobs/src.zip",
+        "application_args": [
+          "--job_asset_bucket", "asset",
+          "--job_input_path", "job-input/bronze2silver_t_margin_extra_balance_his.json"
+        ],
+        "conf": {
+          "spark.databricks.delta.schema.autoMerge.enabled": "true",
+          "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+          "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+          "spark.sql.catalogImplementation": "hive",
+          "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore:9083",
+          "spark.sql.warehouse.dir": "s3a://warehouse/delta/",
+          "spark.hadoop.fs.s3a.endpoint": "http://minio:9000",
+          "spark.hadoop.fs.s3a.access.key": "minio",
+          "spark.hadoop.fs.s3a.secret.key": "minio@123",
+          "spark.hadoop.fs.s3a.path.style.access": "true",
+          "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+          "spark.sql.sources.partitionOverwriteMode": "dynamic",
+          "spark.eventLog.enabled": true,
+          "spark.eventLog.dir": "s3a://spark-logs/events",
+          "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp"
+        }
+      }
+    }
+  ]
+}

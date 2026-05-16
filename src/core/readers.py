@@ -12,7 +12,19 @@ class IcebergReader(BaseReader):
         if not query:
             df = self.spark.table(table)
         return df
-
+    
+class DeltaReader(BaseReader):
+    def load(self) -> DataFrame:
+        table = self.config.get("table")
+        query = self.config.get("query")
+        df = None
+        if query:
+            if "${run_date}" in query:
+                query = query.replace("${run_date}", self.run_data_date)
+            df = self.spark.sql(query)
+        if not query:
+            df = self.spark.table(table)
+        return df
 
 class JDBCReader(BaseReader):
     def load(self) -> DataFrame:
@@ -21,7 +33,8 @@ class JDBCReader(BaseReader):
             .option("url", self.config.get("url"))
         )
         if self.config.get("table"):
-            reader = reader.option("dbtable", self.config["table"])
+            table = self.config["table"].replace("${run_date}", str(self.run_data_date))
+            reader = reader.option("dbtable", table)
         if self.config.get("properties"):
             config = self.config.get("properties")
             for k, v in config.items():

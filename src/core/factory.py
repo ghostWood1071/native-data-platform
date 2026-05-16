@@ -20,16 +20,9 @@ class Factory:
             return data
 
     @staticmethod
-    def create_spark(config:dict):
-        spark_config = config.get("spark-conf")
-        engine_config = config.get("engine-conf")
+    def create_spark():
         spark_builder = SparkSession.builder
-        for config_name, config_val in spark_config.items():
-            spark_builder = spark_builder.config(config_name, config_val)
-        for config_name, config_val in engine_config.items():
-            if config_val:
-                config_func = getattr(spark_builder, config_name)
-                config_func()
+        spark_builder = spark_builder.enableHiveSupport()
         return spark_builder.getOrCreate()
 
     @staticmethod
