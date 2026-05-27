@@ -6,6 +6,7 @@ pipeline {
         MINIO_BUCKET = 'asset'
         DB_HOST = 'master:30432'
         DB_NAME = 'airflow'
+        VENV_PATH = "/opt/jenkins/venvs/data-platform"
     }
 
     stages {
@@ -52,7 +53,7 @@ pipeline {
                         passwordVariable: 'DB_PASSWORD'
                     )
                 ]) {
-                    sh 'python orchestration/update_metadata.py'
+                    sh '$VENV_PATH/bin/python orchestration/update_metadata.py'
                 }
             }
         }
