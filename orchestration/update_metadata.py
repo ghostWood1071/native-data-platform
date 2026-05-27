@@ -140,5 +140,5 @@ if __name__ == "__main__":
     # db = None
     init_metadata_schema(db)
     truncate_all(db)
-    load_config_batch(db)
+    load_config(db)
     print("DONE!")
