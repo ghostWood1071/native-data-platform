@@ -27,12 +27,23 @@ class PostgresDB:
             cur.execute(query, params)
             return cur.fetchone()
 
+    def execute_file(self, file_path):
+        with open(file_path, 'r', encoding='utf-8') as f:
+            sql = f.read()
+            self.execute(sql)
+
 
 def truncate_all(db):
     # db.execute("TRUNCATE TABLE etl_trigger_queue RESTART IDENTITY;")
     db.execute("TRUNCATE TABLE etl_dependency RESTART IDENTITY;")
     db.execute("TRUNCATE TABLE etl_task RESTART IDENTITY;")
     db.execute("TRUNCATE TABLE etl_dag RESTART IDENTITY;")
+
+
+def init_metadata_schema(db):
+    schema_file = "orchestration/metadata-base/metadata-base.sql"
+    print(f"Initializing schema from {schema_file}...")
+    db.execute_file(schema_file)
 
 
 def get_insert_dags_cmd(dag_id, description, schedule_interval, start_date, is_active, tags, default_args):
@@ -84,8 +95,8 @@ def load_config(db, dag_config_path):
             config_json.get("tags"),
             config_json.get('default_args'),
         )
-        # db.execute(insert_dags_cmd)
-        db.write(insert_dags_cmd)
+        db.execute(insert_dags_cmd)
+        # db.write(insert_dags_cmd)
         if not config_json.get("tasks"):
             return
         for task in config_json.get("tasks"):
@@ -93,14 +104,14 @@ def load_config(db, dag_config_path):
             insert_task_cmd = get_insert_task_cmd(
                 dag_id, current_task, task.get("conn_id"), task.get("task_type"), task.get("task_params")
             )
-            # db.execute(insert_task_cmd)
-            db.write(insert_task_cmd)
+            db.execute(insert_task_cmd)
+            # db.write(insert_task_cmd)
             if not task.get("depend_on"):
                 continue
             for depend_id in task.get("depend_on"):
                 insert_depend_cmd = get_dependency_task_cmd(dag_id, depend_id, current_task)
-                # db.execute(insert_depend_cmd)
-                db.write(insert_depend_cmd)
+                db.execute(insert_depend_cmd)
+                # db.write(insert_depend_cmd)
 
 
 def load_config_batch(db):
@@ -127,6 +138,7 @@ if __name__ == "__main__":
         port=int(os.environ.get("DB_PORT", 5432))
     )
     # db = None
+    init_metadata_schema(db)
     truncate_all(db)
     load_config_batch(db)
     print("DONE!")
