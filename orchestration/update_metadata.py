@@ -50,7 +50,7 @@ def get_insert_dags_cmd(dag_id, description, schedule_interval, start_date, is_a
     if schedule_interval is None:
         schedule_interval = 'null'
     else:
-        schedule_interval = f"'{schedule_interval}'"
+        schedule_interval = f"{schedule_interval}"
     return f"""
        INSERT INTO etl_dag (dag_id, description, schedule_interval, start_date, is_active, tags, default_args)
        VALUES (
