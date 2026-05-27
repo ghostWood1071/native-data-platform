@@ -27,13 +27,12 @@ class PostgresDB:
             cur.execute(query, params)
             return cur.fetchone()
 
+
 def truncate_all(db):
     # db.execute("TRUNCATE TABLE etl_trigger_queue RESTART IDENTITY;")
     db.execute("TRUNCATE TABLE etl_dependency RESTART IDENTITY;")
     db.execute("TRUNCATE TABLE etl_task RESTART IDENTITY;")
     db.execute("TRUNCATE TABLE etl_dag RESTART IDENTITY;")
-
-
 
 
 def get_insert_dags_cmd(dag_id, description, schedule_interval, start_date, is_active, tags, default_args):
@@ -50,6 +49,7 @@ def get_insert_dags_cmd(dag_id, description, schedule_interval, start_date, is_a
               );
     """
 
+
 def get_insert_task_cmd(dag_id, task_id, conn_id, task_type, task_params):
     return f"""
         INSERT INTO etl_task (dag_id, task_id, conn_id ,task_type, task_params)
@@ -62,6 +62,7 @@ def get_insert_task_cmd(dag_id, task_id, conn_id, task_type, task_params):
                );
         """
 
+
 def get_dependency_task_cmd(dag_id, up_task_id, down_task_id):
     return f"""
         INSERT INTO etl_dependency (dag_id, upstream_task_id, downstream_task_id)
@@ -69,8 +70,9 @@ def get_dependency_task_cmd(dag_id, up_task_id, down_task_id):
             ('{dag_id}', '{up_task_id}', '{down_task_id}');
     """
 
+
 def load_config(db, dag_config_path):
-    with open(dag_config_path, mode = 'r') as f:
+    with open(dag_config_path, mode='r') as f:
         config_json = json.loads(f.read())
         dag_id = config_json.get('dag_id')
         insert_dags_cmd = get_insert_dags_cmd(
@@ -89,7 +91,7 @@ def load_config(db, dag_config_path):
         for task in config_json.get("tasks"):
             current_task = task.get("task_id")
             insert_task_cmd = get_insert_task_cmd(
-                dag_id, current_task, task.get("conn_id") ,task.get("task_type"), task.get("task_params")
+                dag_id, current_task, task.get("conn_id"), task.get("task_type"), task.get("task_params")
             )
             # db.execute(insert_task_cmd)
             db.write(insert_task_cmd)
@@ -99,16 +101,16 @@ def load_config(db, dag_config_path):
                 insert_depend_cmd = get_dependency_task_cmd(dag_id, depend_id, current_task)
                 # db.execute(insert_depend_cmd)
                 db.write(insert_depend_cmd)
-                
+
 
 def load_config_batch(db):
-    config_path = "../config/workflow/"
+    config_path = "config/workflow/"
     import os
-    config_files = os.listdir(config_path)
+    config_files = [f for f in os.listdir(config_path) if f.endswith('.json')]
     print(config_files)
-    file = open(r"create_job.sql", mode = 'w')
+    file = open(r"orchestration/create_job.sql", mode='w')
     for config_file in config_files:
-        path = f"{config_path}{config_file}"
+        path = os.path.join(config_path, config_file)
         print(path)
         load_config(file, path)
     file.close()
@@ -116,13 +118,15 @@ def load_config_batch(db):
 
 
 if __name__ == "__main__":
-    # db = PostgresDB(
-    #     host="localhost",
-    #     db="airflow",
-    #     user="hive",
-    #     pwd="hive"
-    # )
-    db = None
-    # truncate_all(db)
+    import os
+    db = PostgresDB(
+        host=os.environ.get("DB_HOST", "localhost"),
+        db=os.environ.get("DB_NAME", "airflow"),
+        user=os.environ.get("DB_USER", "hive"),
+        pwd=os.environ.get("DB_PASSWORD", "hive"),
+        port=int(os.environ.get("DB_PORT", 5432))
+    )
+    # db = None
+    truncate_all(db)
     load_config_batch(db)
     print("DONE!")

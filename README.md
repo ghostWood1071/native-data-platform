@@ -1,44 +1,63 @@
 # Data Platform Demo
 
-## Data architecture
+## Data Architecture
 ![enter image description here](https://lh3.googleusercontent.com/pw/AP1GczOu-dWkZa4VL-CGduMzDZI_ueVlKrfnHuvYWsIQ_RtMje2_hcrn82-OHDJvbl1ul63EMhqFSfqHvN2cbKDMqvuBwUU4W8z90VVK43IMiq9iZlAd5rZbyyXEhPCRecpmTjT2eW0gzF67Ba6_f75lBmZW=w621-h281-s-no-gm?authuser=0)  
-I will ingest data from Postgres, store it in silver zone. Then I can make some transformation and save it to to gold zone
+The project implements data collection from Postgres, storage in the Silver zone, followed by transformation and storage into the Gold zone. The system uses Spark Engine (`ghostwood/spark-engine:1.0.0`) and the `neutronx` library to interact with infrastructure (MinIO, Kafka, Postgres).
 
-## How to run?
+## How to Run?
 
-    cd native-data-platform setup.cmd 
-    docker-compose-dev.yaml run.cmd source2silver_customer
-after all container started, create bucket named "warehouse" in minio
-## How to setup job?
-### Ingestion job
-- create config file like the ./config/job/source2silver_order.json
-- create job file  ./jobs/source2silver_order.py
-- run: run.cmd source2silver_order.py
+### Local Development
+1. Navigate to the project directory and run setup:
+   ```cmd
+   setup.cmd
+   ```
+2. Launch the Docker environment:
+   ```cmd
+   docker-compose -f config/environment/docker-compose-dev.yaml up -d
+   ```
+3. Run a test job:
+   ```cmd
+   run.cmd source2silver_customer
+   ```
 
-### Aggregate job
-- create config file like the ./config/job/silver2golden_top_user.json
-- create job file ./jobs/silver2golden_top_user.py
-- create transform file ./core/transformer/silver2golden_top_user.py
-- zip the "src" folder then copy the .zip to infra/job-lib folder
-- run: run.cmd silver2golden_top_user.py
+## How to Setup Job?
 
-## Code flow and CI/CD flow
-### A. Human do
-#### Step 1: Config job and work flow
-in folder "/config/job" contains configuration to define how the engine execute ETL process. in folder "config/workflow" we define resource for the job and define the job dependency. Sometime when we need to upgrade the code, debug or define transform rules for difficult business.
-#### Step 2: Commit job
-After done job configuration and code, we commit and push to our branch. Now all our task done!
-### B. CI/CD flow
-#### step 1: prepare resource
-- zip the "src" folder to minio
-- push folder /config/job to minio
-### step 2: prepare for deploy job
-- go to postgresql run sql in file "orchestration/metadata-base/metadata-base.sql" to create metadata tables.
-- in "orchestration" folder run file update_metadata.py. It can generate metadata from workflow config then insert to metadata tables in postgresql.
-- copy file "orchestration/dags/dag-generator.py" to airflow's dags folder.
-  Done !!!
+### 1. Ingestion Job
+- Create a configuration file at `./config/job/` (e.g., `source2bronze_*.json`).
+- Define the workflow in `./config/workflow/`.
+- Spark Engine will automatically read the configuration and execute.
+
+### 2. Transformation Job
+- Create a job configuration at `./config/job/`.
+- If complex logic is required, create a transform file at `src/business_logic/py_transform/` or use SQL at `src/business_logic/sql_transform/`.
+- Package the source code (`src` folder) into `src.zip` to send to the Spark cluster.
+
+## CI/CD Flow
+
+The system uses Jenkins to automate the deployment process:
+
+### A. Developer Workflow
+1. **Job & Workflow Configuration**: Define JSON files in `config/job` and `config/workflow`.
+2. **Logic Development**: Write transformation code in `src/`.
+3. **Commit & Push**: Push code to the repository to trigger the Jenkins Pipeline.
+
+### B. Jenkins Pipeline (CI/CD)
+1. **Zipping source**: Compresses the `src` directory into `src.zip`.
+2. **Upload to MinIO**: 
+   - Upload `src.zip` and `jobs/entry_point.py` to the `asset/spark-jobs/` bucket.
+   - Recursively upload the `config/job/` directory to `asset/job-input/`.
+   - Recursively upload the `config/workflow/` directory to `asset/workflow/`.
+3. **Update Metadata**: Run the `orchestration/update_metadata.py` script to update configurations in the Airflow Database.
+4. **Airflow DAGs**: Use `dag-generator.py` to automatically generate DAGs based on metadata in Postgres.
+
+## Environment Configuration
+The project uses environment variables to manage configuration (see `env-template`):
+- `ONPREM_MINIO_*`: MinIO connection information.
+- `DB_*`: Postgres connection information (Airflow Metadata).
+- Spark image: `ghostwood/spark-engine:1.0.0`.
+
 ## Summary
-- The platform called native because it's easy to operate in both  on-premise and cloud environments. I deployed the same platform structure in previous projects
-- It's easy to debug because of using pyspark to transform
-- It's easy to scale, just config by json, duplicate it for the same type of job, same for the same table structure
-- It's easy to develop just inherit from base classes
+- **Native**: Easy to operate on both On-premise and Cloud.
+- **Scalable**: Easily extendable via JSON configuration.
+- **Maintainable**: Uses the `neutronx` library to standardize infrastructure interaction.
+- **Automated**: Complete CI/CD process from code to Airflow DAGs.

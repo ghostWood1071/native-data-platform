@@ -1,30 +1,27 @@
 from pyspark import SparkContext
-from minio import Minio
-from minio.error import S3Error
+from pyspark.sql import SparkSession
+from neutronx import PlatformContext, PlatformConfig
 
-def download_file_from_minio(minio_endpoint, access_key, secret_key, bucket, file_name):
-    client = Minio(
-        endpoint=minio_endpoint,
-        access_key=access_key,
-        secret_key=secret_key,
-        secure=False
-    )
-    download_path = file_name.split("/")[-1]
-    try:
-        client.fget_object(bucket, file_name, download_path)
-        return download_path
-    except S3Error as e:
-        raise e
+spark = SparkSession.builder.appName("entry-point").getOrCreate()
 
-lib_path = download_file_from_minio(
-    "minio.storage.svc.cluster.local:9000",
-    "minioadmin",
-    "minio@demo!",
-    "asset",
-    "spark-jobs/src.zip"
+ctx = PlatformContext(
+    spark=spark,
+    config=PlatformConfig.from_env(),
 )
 
-sc = SparkContext.getOrCreate()
-sc.addPyFile(lib_path)
+bucket = "asset"
+file_name = "src.zip"
+download_path = "spark-jobs"
+
+ctx.download_minio_file(
+    bucket=bucket,
+    object_name=file_name,
+    file_path=download_path,
+).unwrap()
+
+sc = spark.sparkContext
+sc.addPyFile(file_name)
+
 from src.core import runner
+
 runner.run()
