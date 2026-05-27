@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        MINIO_ENDPOINT = 'minio-svc-private.storage.svc.cluster.local:9000'
+        MINIO_ENDPOINT = 'master:30900'
         MINIO_BUCKET = 'asset'
-        DB_HOST = 'postgres-airflow.orchestration.svc.cluster.local'
+        DB_HOST = 'master:30432'
         DB_NAME = 'airflow'
     }
 
