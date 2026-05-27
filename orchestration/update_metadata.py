@@ -29,9 +29,9 @@ class PostgresDB:
 
 def truncate_all(db):
     # db.execute("TRUNCATE TABLE etl_trigger_queue RESTART IDENTITY;")
-    db.execute("DELETE FROM etl_dependency;")
-    db.execute("DELETE FROM etl_task;")
-    db.execute("DELETE FROM etl_dag;")
+    db.execute("TRUNCATE TABLE etl_dependency RESTART IDENTITY;")
+    db.execute("TRUNCATE TABLE etl_task RESTART IDENTITY;")
+    db.execute("TRUNCATE TABLE etl_dag RESTART IDENTITY;")
 
 
 
@@ -116,7 +116,6 @@ def load_config_batch(db):
 
 
 if __name__ == "__main__":
-    # Kết nối
     # db = PostgresDB(
     #     host="localhost",
     #     db="airflow",

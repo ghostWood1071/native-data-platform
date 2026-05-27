@@ -1,9 +1,7 @@
 from pyspark import SparkContext
 from minio import Minio
 from minio.error import S3Error
-# "spark.hadoop.fs.s3a.endpoint": "http://minio.storage.svc.cluster.local:9000",
-# "spark.hadoop.fs.s3a.access.key": "minioadmin",
-# "spark.hadoop.fs.s3a.secret.key": "minio@demo!",
+
 def download_file_from_minio(minio_endpoint, access_key, secret_key, bucket, file_name):
     client = Minio(
         endpoint=minio_endpoint,
