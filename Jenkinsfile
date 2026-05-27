@@ -4,8 +4,9 @@ pipeline {
     environment {
         MINIO_ENDPOINT = 'master:30900'
         MINIO_BUCKET = 'asset'
-        DB_HOST = 'master:30432'
+        DB_HOST = 'master'
         DB_NAME = 'airflow'
+        DB_PORT = 30432
         VENV_PATH = "/opt/jenkins/venvs/data-platform"
     }
 
