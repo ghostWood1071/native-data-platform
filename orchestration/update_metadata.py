@@ -119,12 +119,12 @@ def load_config_batch(db):
     import os
     config_files = [f for f in os.listdir(config_path) if f.endswith('.json')]
     print(config_files)
-    file = open(r"orchestration/create_job.sql", mode='w')
+    # file = open(r"orchestration/create_job.sql", mode='w')
     for config_file in config_files:
         path = os.path.join(config_path, config_file)
         print(path)
-        load_config(file, path)
-    file.close()
+        load_config(db, path)
+    # file.close()
 
 
 
@@ -140,5 +140,5 @@ if __name__ == "__main__":
     # db = None
     init_metadata_schema(db)
     truncate_all(db)
-    load_config(db)
+    load_config_batch(db)
     print("DONE!")
