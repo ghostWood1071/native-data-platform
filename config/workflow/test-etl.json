@@ -10,8 +10,8 @@
   "is_paused": false,
   "max_active_runs": 1,
   "max_active_tasks": 16,
-  "retries": 2,
-  "retry_delay": 300,
+  "retries": 0,
+  "retry_delay": 0,
   "tags": ["source2bronze", "bronze2silver"],
   "tasks": [
     {
