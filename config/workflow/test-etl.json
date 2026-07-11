@@ -22,6 +22,7 @@
         "application": "s3a://asset/spark-jobs/entry_point.py",
         "conn_id": "spark_k8s",
         "name": "source2bronze_Orders_Retail3A",
+        "deploy_mode": "cluster",
         "application_args": [
           "--job_asset_bucket", "asset",
           "--job_input_path", "job-input/source2bronze.json"
@@ -29,6 +30,7 @@
         "conf": {
           "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
           "spark.kubernetes.namespace":"compute",
+          "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
           "spark.kubernetes.container.image": "ghostwood/spark-engine:1.0.0",
           "spark.driver.extraClassPath": "/opt/airflow/jars/*",
           "spark.executor.extraClassPath": "/opt/spark/jars/*",
