@@ -867,6 +867,7 @@ def build_serialized_task(
         "proxy_user",
         "env_vars",
         "properties_file",
+        "deploy_mode"
     ]
 
     for field in optional_fields:
