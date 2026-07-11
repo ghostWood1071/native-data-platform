@@ -1,8 +1,13 @@
 from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from neutronx import PlatformContext, PlatformConfig
+import os
 
 spark = SparkSession.builder.appName("entry-point").getOrCreate()
+
+os.putenv("ONPREM_MINIO_ENDPOINT", spark.spark.conf.get("spark.hadoop.fs.s3a.endpoint"))
+os.putenv("ONPREM_MINIO_ACCESS_KEY", spark.spark.conf.get("spark.hadoop.fs.s3a.access.key"))
+os.putenv("ONPREM_MINIO_SECRET_KEY", spark.spark.conf.get("spark.hadoop.fs.s3a.secret.key"))
 
 ctx = PlatformContext(
     spark=spark,
