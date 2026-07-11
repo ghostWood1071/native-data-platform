@@ -25,7 +25,10 @@
         "deploy_mode": "cluster",
         "application_args": [
           "--job_asset_bucket", "asset",
-          "--job_input_path", "job-input/source2bronze.json"
+          "--job_input_path", "job-input/source2bronze.json",
+          "--minio_endpoint", "http://minio-svc-private.storage.svc.cluster.local:9000",
+          "--minio_user", "minioadmin",
+          "--minio_pwd", "minioadmin"
         ],
         "conf": {
           "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
@@ -95,7 +98,7 @@
           "spark.openlineage.namespace": "onprem-spark",
           "spark.openlineage.transport.type": "kafka",
           "spark.openlineage.transport.topicName": "openlineage.events",
-          "spark.openlineage.transport.properties.bootstrap.servers": "kafka.kafka.svc.cluster.local:9092",
+          "spark.openlineage.transport.properties.bootstrap.servers": "kafka.streaming.svc.cluster.local:9092",
           "spark.openlineage.debugFacet": "enabled"
         }
       },

@@ -2,12 +2,53 @@ from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from neutronx import PlatformContext, PlatformConfig
 import os
+import argparse
 
 spark = SparkSession.builder.appName("entry-point").getOrCreate()
 
-os.putenv("ONPREM_MINIO_ENDPOINT", spark.conf.get("spark.hadoop.fs.s3a.endpoint"))
-os.putenv("ONPREM_MINIO_ACCESS_KEY", spark.conf.get("spark.hadoop.fs.s3a.access.key"))
-os.putenv("ONPREM_MINIO_SECRET_KEY", spark.conf.get("spark.hadoop.fs.s3a.secret.key"))
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Run Spark data processing job"
+    )
+
+    parser.add_argument(
+        "--job_asset_bucket",
+        type=str,
+        required=True,
+        help="MinIO bucket chứa job assets",
+    )
+
+    parser.add_argument(
+        "--job_input_path",
+        type=str,
+        required=True,
+        help="Đường dẫn file JSON cấu hình job",
+    )
+
+    parser.add_argument(
+        "--minio_endpoint",
+        type=str,
+        default="dev"
+    )
+
+    parser.add_argument(
+        "--minio_user",
+        type=str,
+        default=""
+    )
+
+    parser.add_argument(
+        "--minio_pwd",
+        type=str,
+        default=""
+    )
+
+    return parser.parse_args()
+
+args = parse_args()
+os.putenv("ONPREM_MINIO_ENDPOINT", args.minio_endpoint)
+os.putenv("ONPREM_MINIO_ACCESS_KEY", args.minio_user)
+os.putenv("ONPREM_MINIO_SECRET_KEY", args.minio_pwd)
 
 print("minio endpoint: ", os.getenv("ONPREM_MINIO_ENDPOINT"))
 
