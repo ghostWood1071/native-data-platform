@@ -64,7 +64,7 @@ download_path = "spark-jobs"
 ctx.download_minio_file(
     bucket=bucket,
     object_name=download_path + "/" +file_name,
-    file_path="/opt/spark/work-dir/",
+    file_path=f"/opt/spark/work-dir/{file_name}",
 ).unwrap()
 
 sc = spark.sparkContext
