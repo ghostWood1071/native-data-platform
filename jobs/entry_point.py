@@ -1,3 +1,4 @@
+from mako.filters import trim
 from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from neutronx import PlatformContext, PlatformConfig
@@ -46,9 +47,9 @@ def parse_args():
     return parser.parse_args()
 
 args = parse_args()
-os.putenv("ONPREM_MINIO_ENDPOINT", args.minio_endpoint)
-os.putenv("ONPREM_MINIO_ACCESS_KEY", args.minio_user)
-os.putenv("ONPREM_MINIO_SECRET_KEY", args.minio_pwd)
+os.environ["ONPREM_MINIO_ENDPOINT"] = trim(args.minio_endpoint)
+os.environ["ONPREM_MINIO_ACCESS_KEY"] = trim(args.minio_user)
+os.environ["ONPREM_MINIO_SECRET_KEY"] = trim(args.minio_pwd)
 
 print("minio endpoint: ", args.minio_endpoint)
 
