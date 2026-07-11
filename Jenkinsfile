@@ -52,9 +52,14 @@ pipeline {
                         credentialsId: 'airflow-postgres-creds',
                         usernameVariable: 'DB_USER',
                         passwordVariable: 'DB_PASSWORD'
+                    ),
+                    usernamePassword(
+                        credentialsId: 'minio-creds',
+                        usernameVariable: 'MINIO_ACCESS_KEY',
+                        passwordVariable: 'MINIO_SECRET_KEY'
                     )
                 ]) {
-                    sh '$VENV_PATH/bin/python orchestration/update_metadata.py'
+                    sh '$VENV_PATH/bin/python orchestration/json_raw_sql_compiler.py --apply-dir config/workflow --recursive --unpause'
                 }
             }
         }
