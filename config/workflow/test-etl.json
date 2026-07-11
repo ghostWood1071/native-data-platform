@@ -26,7 +26,7 @@
         "application_args": [
           "--job_asset_bucket", "asset",
           "--job_input_path", "job-input/source2bronze.json",
-          "--minio_endpoint", "http://minio-svc-private.storage.svc.cluster.local:9000",
+          "--minio_endpoint", "minio-svc-private.storage.svc.cluster.local:9000",
           "--minio_user", "minioadmin",
           "--minio_pwd", "minioadmin"
         ],
