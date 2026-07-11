@@ -1,0 +1,102 @@
+{
+  "dag_id": "source2silver_test1",
+  "description": "source -> bronze -> silver",
+  "owner": "data_team",
+  "email": ["baoss712005@gmail.com"],
+  "timezone": "UTC",
+  "start_date": "2025-01-01T00:00:00+00:00",
+  "schedule": "0 18 * * *",
+  "catchup": false,
+  "is_paused": false,
+  "max_active_runs": 1,
+  "max_active_tasks": 16,
+  "retries": 2,
+  "retry_delay": 300,
+  "tags": ["source2bronze", "bronze2silver"],
+  "tasks": [
+    {
+      "task_id": "source2bronze_Orders_Retail3A",
+      "operator": "SparkSubmitOperator",
+      "module": "airflow.providers.apache.spark.operators.spark_submit",
+      "params": {
+        "application": "s3a://asset/spark-jobs/entry_point.py",
+        "conn_id": "spark_k8s",
+        "name": "source2bronze_Orders_Retail3A",
+        "application_args": [
+          "--job_asset_bucket", "asset",
+          "--job_input_path", "job-input/source2bronze.json"
+        ],
+        "conf": {
+          "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+          "spark.kubernetes.namespace":"compute",
+          "spark.kubernetes.container.image": "ghostwood/spark-engine:1.0.0",
+          "spark.driver.extraClassPath": "/opt/airflow/jars/*",
+          "spark.executor.extraClassPath": "/opt/spark/jars/*",
+          "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+          "spark.sql.catalogImplementation": "hive",
+          "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore:9083",
+          "spark.sql.warehouse.dir": "s3a://warehouse/",
+          "spark.hadoop.fs.s3a.endpoint": "http://minio-svc-private.storage.svc.cluster.local:9000",
+          "spark.hadoop.fs.s3a.access.key": "minioadmin",
+          "spark.hadoop.fs.s3a.secret.key": "minioadmin",
+          "spark.hadoop.fs.s3a.path.style.access": "true",
+          "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+          "spark.sql.sources.partitionOverwriteMode": "dynamic",
+          "spark.eventLog.enabled": "true",
+          "spark.eventLog.dir": "s3a://spark-logs/events",
+          "app.job_asset_bucket": "asset",
+          "app.job_input_path": "job-input/source2bronze.json",
+          "spark.jars.packages": "io.openlineage:openlineage-spark:1.7.0",
+          "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
+          "spark.openlineage.namespace": "onprem-spark",
+          "spark.openlineage.transport.type": "kafka",
+          "spark.openlineage.transport.topicName": "openlineage.events",
+          "spark.openlineage.transport.properties.bootstrap.servers": "kafka.kafka.svc.cluster.local:9092",
+          "spark.openlineage.debugFacet": "enabled"
+        }
+      },
+      "downstream": ["bronze2silver_Orders_Retail3A"]
+    },
+    {
+      "task_id": "bronze2silver_Orders_Retail3A",
+      "operator": "SparkSubmitOperator",
+      "module": "airflow.providers.apache.spark.operators.spark_submit",
+      "params": {
+        "application": "s3a://asset/spark-jobs/entry_point.py",
+        "conn_id": "spark_k8s",
+        "name": "bronze2silver_Orders_Retail3A",
+        "application_args": [
+          "--job_asset_bucket", "asset",
+          "--job_input_path", "job-input/bronze2silver.json"
+        ],
+        "conf": {
+          "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+          "spark.driver.extraClassPath": "/opt/airflow/jars/*",
+          "spark.executor.extraClassPath": "/opt/spark/jars/*",
+          "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+          "spark.sql.catalogImplementation": "hive",
+          "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore:9083",
+          "spark.sql.warehouse.dir": "s3a://warehouse/",
+          "spark.hadoop.fs.s3a.endpoint": "http://minio-svc-private.storage.svc.cluster.local:9000",
+          "spark.hadoop.fs.s3a.access.key": "minioadmin",
+          "spark.hadoop.fs.s3a.secret.key": "minioadmin",
+          "spark.hadoop.fs.s3a.path.style.access": "true",
+          "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+          "spark.sql.sources.partitionOverwriteMode": "dynamic",
+          "spark.eventLog.enabled": "true",
+          "spark.eventLog.dir": "s3a://spark-logs/events",
+          "app.job_asset_bucket": "asset",
+          "app.job_input_path": "job-input/bronze2silver.json",
+          "spark.jars.packages": "io.openlineage:openlineage-spark:1.7.0",
+          "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
+          "spark.openlineage.namespace": "onprem-spark",
+          "spark.openlineage.transport.type": "kafka",
+          "spark.openlineage.transport.topicName": "openlineage.events",
+          "spark.openlineage.transport.properties.bootstrap.servers": "kafka.kafka.svc.cluster.local:9092",
+          "spark.openlineage.debugFacet": "enabled"
+        }
+      },
+      "downstream": []
+    }
+  ]
+}
