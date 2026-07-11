@@ -31,7 +31,7 @@
           "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
           "spark.kubernetes.namespace":"compute",
           "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
-          "spark.kubernetes.container.image": "ghostwood/spark-engine:1.0.0",
+          "spark.kubernetes.container.image": "ghostwood/spark-engine:1.0.1",
           "spark.driver.extraClassPath": "/opt/airflow/jars/*",
           "spark.executor.extraClassPath": "/opt/spark/jars/*",
           "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
@@ -48,7 +48,7 @@
           "spark.eventLog.dir": "s3a://spark-logs/events",
           "app.job_asset_bucket": "asset",
           "app.job_input_path": "job-input/source2bronze.json",
-          "spark.jars.packages": "io.openlineage:openlineage-spark:1.7.0",
+
           "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
           "spark.openlineage.namespace": "onprem-spark",
           "spark.openlineage.transport.type": "kafka",
@@ -89,7 +89,7 @@
           "spark.eventLog.dir": "s3a://spark-logs/events",
           "app.job_asset_bucket": "asset",
           "app.job_input_path": "job-input/bronze2silver.json",
-          "spark.jars.packages": "io.openlineage:openlineage-spark:1.7.0",
+
           "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
           "spark.openlineage.namespace": "onprem-spark",
           "spark.openlineage.transport.type": "kafka",
