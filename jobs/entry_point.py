@@ -63,7 +63,7 @@ download_path = "spark-jobs"
 
 ctx.download_minio_file(
     bucket=bucket,
-    object_name=file_name,
+    object_name=download_path + "/" +file_name,
     file_path=download_path,
 ).unwrap()
 
