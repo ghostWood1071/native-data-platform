@@ -50,7 +50,7 @@ os.putenv("ONPREM_MINIO_ENDPOINT", args.minio_endpoint)
 os.putenv("ONPREM_MINIO_ACCESS_KEY", args.minio_user)
 os.putenv("ONPREM_MINIO_SECRET_KEY", args.minio_pwd)
 
-print("minio endpoint: ", os.getenv("ONPREM_MINIO_ENDPOINT"))
+print("minio endpoint: ", args.minio_endpoint)
 
 ctx = PlatformContext(
     spark=spark,
