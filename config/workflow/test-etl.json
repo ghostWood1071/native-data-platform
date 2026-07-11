@@ -39,7 +39,7 @@
           "spark.executor.extraClassPath": "/opt/spark/jars/*",
           "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
           "spark.sql.catalogImplementation": "hive",
-          "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore:9083",
+          "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083",
           "spark.sql.warehouse.dir": "s3a://warehouse/",
           "spark.hadoop.fs.s3a.endpoint": "http://minio-svc-private.storage.svc.cluster.local:9000",
           "spark.hadoop.fs.s3a.access.key": "minioadmin",
