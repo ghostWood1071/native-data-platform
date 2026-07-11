@@ -307,6 +307,7 @@ def upsert_row(
     params = {k: adapt_value(v) for k, v in clean.items()}
 
     with conn.cursor() as cur:
+        print(sql)
         cur.execute(sql, params)
 
 
