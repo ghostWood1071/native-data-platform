@@ -57,7 +57,7 @@
           "spark.openlineage.transport.topicName": "openlineage.events",
           "spark.openlineage.transport.properties.key.serializer": "org.apache.kafka.common.serialization.StringSerializer",
           "spark.openlineage.transport.properties.value.serializer": "org.apache.kafka.common.serialization.StringSerializer",
-          "spark.openlineage.transport.properties.bootstrap.servers": "kafka.kafka.svc.cluster.local:9092",
+          "spark.openlineage.transport.properties.bootstrap.servers": "kafka.streaming.svc.cluster.local:9092",
           "spark.openlineage.debugFacet": "enabled"
         }
       },
