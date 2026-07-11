@@ -101,9 +101,9 @@ def normalize_db_url(url: str) -> str:
 def connect(db_host: str, db_port:str, db_name:str, db_user:str, db_pwd:str):
     return psycopg2.connect(
         host=db_host,
-        db=db_name,
+        dbname=db_name,
         user=db_user,
-        pwd=db_pwd,
+        password=db_pwd,
         port=int(db_port),
         cursor_factory=RealDictCursor,
     )
