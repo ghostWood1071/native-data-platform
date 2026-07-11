@@ -23,7 +23,7 @@ pipeline {
                 echo 'Uploading files to MinIO...'
                 withCredentials([
                     usernamePassword(
-                        credentialsId: 'minio-creds',
+                        credentialsId: 'minio-s3-credentials',
                         usernameVariable: 'MINIO_ACCESS_KEY',
                         passwordVariable: 'MINIO_SECRET_KEY'
                     )
@@ -54,7 +54,7 @@ pipeline {
                         passwordVariable: 'DB_PASSWORD'
                     ),
                     usernamePassword(
-                        credentialsId: 'minio-creds',
+                        credentialsId: 'minio-s3-credentials',
                         usernameVariable: 'MINIO_ACCESS_KEY',
                         passwordVariable: 'MINIO_SECRET_KEY'
                     )
