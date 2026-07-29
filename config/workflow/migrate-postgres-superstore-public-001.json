@@ -53,7 +53,7 @@
           "spark.openlineage.namespace": "onprem-spark",
           "spark.openlineage.transport.type": "kafka",
           "spark.openlineage.transport.topicName": "openlineage.events",
-          "spark.openlineage.transport.properties.bootstrap.servers": "kafka.streaming.svc.cluster.local:9092",
+          "spark.openlineage.transport.properties.bootstrap.servers": "kafka-broker.streaming.svc.cluster.local:9092",
           "spark.openlineage.debugFacet": "enabled",
           "app.job_asset_bucket": "asset",
           "app.job_input_path": "job-input/migrate_postgres_superstore_public_branches.json"
@@ -100,7 +100,7 @@
           "spark.openlineage.namespace": "onprem-spark",
           "spark.openlineage.transport.type": "kafka",
           "spark.openlineage.transport.topicName": "openlineage.events",
-          "spark.openlineage.transport.properties.bootstrap.servers": "kafka.streaming.svc.cluster.local:9092",
+          "spark.openlineage.transport.properties.bootstrap.servers": "kafka-broker.streaming.svc.cluster.local:9092",
           "spark.openlineage.debugFacet": "enabled",
           "app.job_asset_bucket": "asset",
           "app.job_input_path": "job-input/migrate_postgres_superstore_public_categories.json"
@@ -147,7 +147,7 @@
           "spark.openlineage.namespace": "onprem-spark",
           "spark.openlineage.transport.type": "kafka",
           "spark.openlineage.transport.topicName": "openlineage.events",
-          "spark.openlineage.transport.properties.bootstrap.servers": "kafka.streaming.svc.cluster.local:9092",
+          "spark.openlineage.transport.properties.bootstrap.servers": "kafka-broker.streaming.svc.cluster.local:9092",
           "spark.openlineage.debugFacet": "enabled",
           "app.job_asset_bucket": "asset",
           "app.job_input_path": "job-input/migrate_postgres_superstore_public_customers.json"
