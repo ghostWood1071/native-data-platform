@@ -49,6 +49,12 @@
           "spark.sql.sources.partitionOverwriteMode": "dynamic",
           "spark.eventLog.enabled": "true",
           "spark.eventLog.dir": "s3a://spark-logs/events",
+          "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
+          "spark.openlineage.namespace": "onprem-spark",
+          "spark.openlineage.transport.type": "kafka",
+          "spark.openlineage.transport.topicName": "openlineage.events",
+          "spark.openlineage.transport.properties.bootstrap.servers": "kafka.streaming.svc.cluster.local:9092",
+          "spark.openlineage.debugFacet": "enabled",
           "app.job_asset_bucket": "asset",
           "app.job_input_path": "job-input/migrate_postgres_superstore_public_branches.json"
         }
@@ -90,6 +96,12 @@
           "spark.sql.sources.partitionOverwriteMode": "dynamic",
           "spark.eventLog.enabled": "true",
           "spark.eventLog.dir": "s3a://spark-logs/events",
+          "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
+          "spark.openlineage.namespace": "onprem-spark",
+          "spark.openlineage.transport.type": "kafka",
+          "spark.openlineage.transport.topicName": "openlineage.events",
+          "spark.openlineage.transport.properties.bootstrap.servers": "kafka.streaming.svc.cluster.local:9092",
+          "spark.openlineage.debugFacet": "enabled",
           "app.job_asset_bucket": "asset",
           "app.job_input_path": "job-input/migrate_postgres_superstore_public_categories.json"
         }
@@ -131,6 +143,12 @@
           "spark.sql.sources.partitionOverwriteMode": "dynamic",
           "spark.eventLog.enabled": "true",
           "spark.eventLog.dir": "s3a://spark-logs/events",
+          "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
+          "spark.openlineage.namespace": "onprem-spark",
+          "spark.openlineage.transport.type": "kafka",
+          "spark.openlineage.transport.topicName": "openlineage.events",
+          "spark.openlineage.transport.properties.bootstrap.servers": "kafka.streaming.svc.cluster.local:9092",
+          "spark.openlineage.debugFacet": "enabled",
           "app.job_asset_bucket": "asset",
           "app.job_input_path": "job-input/migrate_postgres_superstore_public_customers.json"
         }
