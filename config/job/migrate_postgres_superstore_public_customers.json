@@ -1,0 +1,33 @@
+{
+  "run_mode": {
+    "name": "default"
+  },
+  "extract": {
+    "customers": {
+      "reader": "JDBCReader",
+      "url": "jdbc:postgresql://postgresdb.streaming.svc.cluster.local:5432/superstore",
+      "query": "SELECT userid AS user_id, username_ AS username, namesurname AS name_surname, status_ AS status, usergender AS user_gender, userbirthdate AS user_birth_date, region AS region, city AS city, town AS town, district AS district, addresstext AS address_text FROM public.customers",
+      "properties": {
+        "user": "postgres",
+        "password": "postgres",
+        "driver": "org.postgresql.Driver"
+      }
+    }
+  },
+  "transform": {
+    "transformer": "ConfigTransformer",
+    "transformation": {
+      "customers": []
+    }
+  },
+  "load": {
+    "customers": {
+      "writer": "DeltaWriter",
+      "mode": "overwrite",
+      "table_name": "spark_catalog.bronze_superstore.customers",
+      "path": "s3a://warehouse/bronze_superstore/customers",
+      "partition_by": [],
+      "first": true
+    }
+  }
+}

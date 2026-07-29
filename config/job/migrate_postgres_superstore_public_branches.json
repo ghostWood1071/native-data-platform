@@ -1,0 +1,33 @@
+{
+  "run_mode": {
+    "name": "default"
+  },
+  "extract": {
+    "branches": {
+      "reader": "JDBCReader",
+      "url": "jdbc:postgresql://postgresdb.streaming.svc.cluster.local:5432/superstore",
+      "query": "SELECT branch_id AS branch_id, region AS region, city AS city, town AS town, branch_town AS branch_town, lat AS lat, lon AS lon FROM public.branches",
+      "properties": {
+        "user": "postgres",
+        "password": "postgres",
+        "driver": "org.postgresql.Driver"
+      }
+    }
+  },
+  "transform": {
+    "transformer": "ConfigTransformer",
+    "transformation": {
+      "branches": []
+    }
+  },
+  "load": {
+    "branches": {
+      "writer": "DeltaWriter",
+      "mode": "overwrite",
+      "table_name": "spark_catalog.bronze_superstore.branches",
+      "path": "s3a://warehouse/bronze_superstore/branches",
+      "partition_by": [],
+      "first": true
+    }
+  }
+}

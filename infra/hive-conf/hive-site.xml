@@ -18,11 +18,11 @@
 </property>
 <property>
 <name>fs.s3a.access.key</name>
-<value>minio</value>
+<value>minioadmin1</value>
 </property>
 <property>
 <name>fs.s3a.secret.key</name>
-<value>minio@123</value>
+<value>minioadmin1</value>
 </property>
 <property>
 <name>fs.s3a.endpoint</name>

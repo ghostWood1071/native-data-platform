@@ -1,0 +1,33 @@
+{
+  "run_mode": {
+    "name": "default"
+  },
+  "extract": {
+    "order_details": {
+      "reader": "JDBCReader",
+      "url": "jdbc:postgresql://postgresdb.streaming.svc.cluster.local:5432/superstore",
+      "query": "SELECT orderid AS order_id, orderdetailid AS order_detail_id, amount AS amount, unitprice AS unit_price, totalprice AS total_price, itemid AS item_id, itemcode AS item_code FROM public.order_details",
+      "properties": {
+        "user": "postgres",
+        "password": "postgres",
+        "driver": "org.postgresql.Driver"
+      }
+    }
+  },
+  "transform": {
+    "transformer": "ConfigTransformer",
+    "transformation": {
+      "order_details": []
+    }
+  },
+  "load": {
+    "order_details": {
+      "writer": "DeltaWriter",
+      "mode": "overwrite",
+      "table_name": "spark_catalog.bronze_superstore.order_details",
+      "path": "s3a://warehouse/bronze_superstore/order_details",
+      "partition_by": [],
+      "first": true
+    }
+  }
+}

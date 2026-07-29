@@ -1,0 +1,144 @@
+{
+  "dag_id": "migrate_postgres_superstore_public_001",
+  "description": "Migrate public Postgres superstore tables to Delta bronze_superstore: branches, categories, customers",
+  "owner": "data_team",
+  "email": [],
+  "timezone": "UTC",
+  "start_date": "2025-01-01T00:00:00+00:00",
+  "schedule": null,
+  "catchup": false,
+  "is_paused": false,
+  "max_active_runs": 1,
+  "max_active_tasks": 3,
+  "retries": 0,
+  "retry_delay": 0,
+  "tags": ["postgres", "superstore", "public", "delta", "migration"],
+  "tasks": [
+    {
+      "task_id": "migrate_postgres_superstore_public_branches",
+      "operator": "SparkSubmitOperator",
+      "module": "airflow.providers.apache.spark.operators.spark_submit",
+      "params": {
+        "application": "s3a://asset/spark-jobs/entry_point.py",
+        "conn_id": "spark_k8s",
+        "name": "migrate_postgres_superstore_public_branches",
+        "deploy_mode": "cluster",
+        "application_args": [
+          "--job_asset_bucket", "asset",
+          "--job_input_path", "job-input/migrate_postgres_superstore_public_branches.json",
+          "--minio_endpoint", "minio-svc-private.storage.svc.cluster.local:9000",
+          "--minio_user", "minioadmin1",
+          "--minio_pwd", "minioadmin1"
+        ],
+        "conf": {
+          "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+          "spark.kubernetes.namespace": "compute",
+          "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
+          "spark.kubernetes.container.image": "ghostwood/spark-engine:1.0.2",
+          "spark.driver.extraClassPath": "/opt/airflow/jars/*",
+          "spark.executor.extraClassPath": "/opt/spark/jars/*",
+          "spark.jars.packages": "org.postgresql:postgresql:42.7.3",
+          "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+          "spark.sql.catalogImplementation": "hive",
+          "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083",
+          "spark.sql.warehouse.dir": "s3a://warehouse/",
+          "spark.hadoop.fs.s3a.endpoint": "http://minio-svc-private.storage.svc.cluster.local:9000",
+          "spark.hadoop.fs.s3a.access.key": "minioadmin1",
+          "spark.hadoop.fs.s3a.secret.key": "minioadmin1",
+          "spark.hadoop.fs.s3a.path.style.access": "true",
+          "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+          "spark.sql.sources.partitionOverwriteMode": "dynamic",
+          "spark.eventLog.enabled": "true",
+          "spark.eventLog.dir": "s3a://spark-logs/events",
+          "app.job_asset_bucket": "asset",
+          "app.job_input_path": "job-input/migrate_postgres_superstore_public_branches.json"
+        }
+      },
+      "downstream": []
+    },
+    {
+      "task_id": "migrate_postgres_superstore_public_categories",
+      "operator": "SparkSubmitOperator",
+      "module": "airflow.providers.apache.spark.operators.spark_submit",
+      "params": {
+        "application": "s3a://asset/spark-jobs/entry_point.py",
+        "conn_id": "spark_k8s",
+        "name": "migrate_postgres_superstore_public_categories",
+        "deploy_mode": "cluster",
+        "application_args": [
+          "--job_asset_bucket", "asset",
+          "--job_input_path", "job-input/migrate_postgres_superstore_public_categories.json",
+          "--minio_endpoint", "minio-svc-private.storage.svc.cluster.local:9000",
+          "--minio_user", "minioadmin1",
+          "--minio_pwd", "minioadmin1"
+        ],
+        "conf": {
+          "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+          "spark.kubernetes.namespace": "compute",
+          "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
+          "spark.kubernetes.container.image": "ghostwood/spark-engine:1.0.2",
+          "spark.driver.extraClassPath": "/opt/airflow/jars/*",
+          "spark.executor.extraClassPath": "/opt/spark/jars/*",
+          "spark.jars.packages": "org.postgresql:postgresql:42.7.3",
+          "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+          "spark.sql.catalogImplementation": "hive",
+          "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083",
+          "spark.sql.warehouse.dir": "s3a://warehouse/",
+          "spark.hadoop.fs.s3a.endpoint": "http://minio-svc-private.storage.svc.cluster.local:9000",
+          "spark.hadoop.fs.s3a.access.key": "minioadmin1",
+          "spark.hadoop.fs.s3a.secret.key": "minioadmin1",
+          "spark.hadoop.fs.s3a.path.style.access": "true",
+          "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+          "spark.sql.sources.partitionOverwriteMode": "dynamic",
+          "spark.eventLog.enabled": "true",
+          "spark.eventLog.dir": "s3a://spark-logs/events",
+          "app.job_asset_bucket": "asset",
+          "app.job_input_path": "job-input/migrate_postgres_superstore_public_categories.json"
+        }
+      },
+      "downstream": []
+    },
+    {
+      "task_id": "migrate_postgres_superstore_public_customers",
+      "operator": "SparkSubmitOperator",
+      "module": "airflow.providers.apache.spark.operators.spark_submit",
+      "params": {
+        "application": "s3a://asset/spark-jobs/entry_point.py",
+        "conn_id": "spark_k8s",
+        "name": "migrate_postgres_superstore_public_customers",
+        "deploy_mode": "cluster",
+        "application_args": [
+          "--job_asset_bucket", "asset",
+          "--job_input_path", "job-input/migrate_postgres_superstore_public_customers.json",
+          "--minio_endpoint", "minio-svc-private.storage.svc.cluster.local:9000",
+          "--minio_user", "minioadmin1",
+          "--minio_pwd", "minioadmin1"
+        ],
+        "conf": {
+          "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+          "spark.kubernetes.namespace": "compute",
+          "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
+          "spark.kubernetes.container.image": "ghostwood/spark-engine:1.0.2",
+          "spark.driver.extraClassPath": "/opt/airflow/jars/*",
+          "spark.executor.extraClassPath": "/opt/spark/jars/*",
+          "spark.jars.packages": "org.postgresql:postgresql:42.7.3",
+          "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+          "spark.sql.catalogImplementation": "hive",
+          "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083",
+          "spark.sql.warehouse.dir": "s3a://warehouse/",
+          "spark.hadoop.fs.s3a.endpoint": "http://minio-svc-private.storage.svc.cluster.local:9000",
+          "spark.hadoop.fs.s3a.access.key": "minioadmin1",
+          "spark.hadoop.fs.s3a.secret.key": "minioadmin1",
+          "spark.hadoop.fs.s3a.path.style.access": "true",
+          "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+          "spark.sql.sources.partitionOverwriteMode": "dynamic",
+          "spark.eventLog.enabled": "true",
+          "spark.eventLog.dir": "s3a://spark-logs/events",
+          "app.job_asset_bucket": "asset",
+          "app.job_input_path": "job-input/migrate_postgres_superstore_public_customers.json"
+        }
+      },
+      "downstream": []
+    }
+  ]
+}

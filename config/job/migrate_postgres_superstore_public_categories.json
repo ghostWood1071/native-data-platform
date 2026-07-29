@@ -1,0 +1,33 @@
+{
+  "run_mode": {
+    "name": "default"
+  },
+  "extract": {
+    "categories": {
+      "reader": "JDBCReader",
+      "url": "jdbc:postgresql://postgresdb.streaming.svc.cluster.local:5432/superstore",
+      "query": "SELECT itemid AS item_id, category1 AS category_1, category1_id AS category_1_id, category2 AS category_2, category2_id AS category_2_id, category3 AS category_3, category3_id AS category_3_id, category4 AS category_4, category4_id AS category_4_id, brand AS brand, itemcode AS item_code, itemname AS item_name FROM public.categories",
+      "properties": {
+        "user": "postgres",
+        "password": "postgres",
+        "driver": "org.postgresql.Driver"
+      }
+    }
+  },
+  "transform": {
+    "transformer": "ConfigTransformer",
+    "transformation": {
+      "categories": []
+    }
+  },
+  "load": {
+    "categories": {
+      "writer": "DeltaWriter",
+      "mode": "overwrite",
+      "table_name": "spark_catalog.bronze_superstore.categories",
+      "path": "s3a://warehouse/bronze_superstore/categories",
+      "partition_by": [],
+      "first": true
+    }
+  }
+}

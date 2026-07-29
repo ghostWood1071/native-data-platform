@@ -1,0 +1,33 @@
+{
+  "run_mode": {
+    "name": "default"
+  },
+  "extract": {
+    "orders": {
+      "reader": "JDBCReader",
+      "url": "jdbc:postgresql://postgresdb.streaming.svc.cluster.local:5432/superstore",
+      "query": "SELECT orderid AS order_id, branch_id AS branch_id, date_ AS order_date, userid AS user_id, namesurname AS name_surname, totalbasket AS total_basket FROM public.orders",
+      "properties": {
+        "user": "postgres",
+        "password": "postgres",
+        "driver": "org.postgresql.Driver"
+      }
+    }
+  },
+  "transform": {
+    "transformer": "ConfigTransformer",
+    "transformation": {
+      "orders": []
+    }
+  },
+  "load": {
+    "orders": {
+      "writer": "DeltaWriter",
+      "mode": "overwrite",
+      "table_name": "spark_catalog.bronze_superstore.orders",
+      "path": "s3a://warehouse/bronze_superstore/orders",
+      "partition_by": [],
+      "first": true
+    }
+  }
+}
