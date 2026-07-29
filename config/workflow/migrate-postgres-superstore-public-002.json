@@ -56,8 +56,7 @@
           "spark.openlineage.transport.properties.bootstrap.servers": "kafka-broker.streaming.svc.cluster.local:9092",
           "spark.openlineage.debugFacet": "enabled",
           "app.job_asset_bucket": "asset",
-          "app.job_input_path": "job-input/migrate_postgres_superstore_public_order_details.json",
-
+          "app.job_input_path": "job-input/migrate_postgres_superstore_public_order_details.json"
         }
       },
       "downstream": []
