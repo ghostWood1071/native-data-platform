@@ -25,7 +25,7 @@
       "writer": "DeltaWriter",
       "mode": "overwrite",
       "table_name": "spark_catalog.default.bronze_superstore_categories",
-      "path": "s3a://asset/warehouse/bronze_superstore/categories",
+      "path": "s3a://warehouse/bronze_superstore/categories",
       "partition_by": [],
       "first": true
     }
