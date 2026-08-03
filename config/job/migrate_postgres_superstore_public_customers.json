@@ -24,7 +24,7 @@
     "customers": {
       "writer": "DeltaWriter",
       "mode": "overwrite",
-      "table_name": "spark_catalog.default.bronze_superstore_customers",
+      "table_name": "spark_catalog.bronze.superstore_customers",
       "path": "s3a://warehouse/bronze_superstore/customers",
       "partition_by": [],
       "first": true

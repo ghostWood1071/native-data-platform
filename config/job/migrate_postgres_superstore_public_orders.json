@@ -24,7 +24,7 @@
     "orders": {
       "writer": "DeltaWriter",
       "mode": "overwrite",
-      "table_name": "spark_catalog.default.bronze_superstore_orders",
+      "table_name": "spark_catalog.bronze.superstore_orders",
       "path": "s3a://warehouse/bronze_superstore/orders",
       "partition_by": [],
       "first": true
