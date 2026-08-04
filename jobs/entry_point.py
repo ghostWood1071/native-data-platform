@@ -4,8 +4,8 @@ from neutronx import PlatformContext, PlatformConfig
 import os
 import argparse
 
-spark = SparkSession.builder.appName("entry-point").getOrCreate()
-
+#spark = SparkSession.builder.appName("entry-point").getOrCreate()
+spark = SparkSession.builder.getOrCreate()
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Run Spark data processing job"
