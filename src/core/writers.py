@@ -82,15 +82,9 @@ class DeltaWriter(BaseWriter):
                             .mode("overwrite")
                             .partitionBy(*partition_cols)
                             .option("path", self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}"))
-                            .save()
+                            .saveAsTable(fqn_table_name)
         )
-        if first:
-            self.spark.sql(f"DROP TABLE IF EXISTS {db_name}.{table_name}")
-            self.spark.sql(f"""
-                CREATE TABLE IF NOT EXISTS {db_name}.{table_name}
-                USING delta
-                LOCATION '{self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}")}'
-            """)
+        
 
 
     def append(self, df: DataFrame):
