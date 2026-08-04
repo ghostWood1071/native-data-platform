@@ -82,7 +82,7 @@ class DeltaWriter(BaseWriter):
                             .mode("overwrite")
                             .partitionBy(*partition_cols)
                             .option("path", self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}"))
-                            .saveAsTable(fqn_table_name)
+                            .save()
         )
         if first:
             self.spark.sql(f"DROP TABLE IF EXISTS {db_name}.{table_name}")
