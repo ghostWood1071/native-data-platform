@@ -61,7 +61,7 @@
           "app.job_input_path": "job-input/migrate_postgres_superstore_public_branches.json"
         }
       },
-      "downstream": []
+      "downstream": ["migrate_postgres_superstore_public_categories"]
     },
     {
       "task_id": "migrate_postgres_superstore_public_categories",
@@ -110,7 +110,7 @@
           "app.job_input_path": "job-input/migrate_postgres_superstore_public_categories.json"
         }
       },
-      "downstream": []
+      "downstream": ["migrate_postgres_superstore_public_customers"]
     },
     {
       "task_id": "migrate_postgres_superstore_public_customers",
