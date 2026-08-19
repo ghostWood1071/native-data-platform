@@ -1,0 +1,76 @@
+{
+  "dag_id": "tc3",
+  "description": "Approved execution workflow for pipeline tc3",
+  "owner": "data_team",
+  "email": [],
+  "timezone": "Asia/Ho_Chi_Minh",
+  "start_date": "2025-01-01T00:00:00+00:00",
+  "schedule": "0 2 * * *",
+  "catchup": false,
+  "is_paused": false,
+  "max_active_runs": 1,
+  "max_active_tasks": 3,
+  "retries": 0,
+  "retry_delay": 0,
+  "tags": [
+    "lineage",
+    "approved",
+    "generated"
+  ],
+  "tasks": [
+    {
+      "task_id": "tc3",
+      "operator": "SparkSubmitOperator",
+      "module": "airflow.providers.apache.spark.operators.spark_submit",
+      "params": {
+        "application": "s3a://asset/spark-jobs/entry_point.py",
+        "conn_id": "spark_k8s",
+        "name": "tc3",
+        "deploy_mode": "cluster",
+        "application_args": [
+          "--job_asset_bucket",
+          "asset",
+          "--job_input_path",
+          "job-input/tc3.json",
+          "--minio_endpoint",
+          "minio-svc-private.storage.svc.cluster.local:9000",
+          "--minio_user",
+          "minioadmin1",
+          "--minio_pwd",
+          "minioadmin1"
+        ],
+        "conf": {
+          "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
+          "spark.kubernetes.namespace": "compute",
+          "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
+          "spark.kubernetes.container.image": "ghostwood/spark-engine:1.0.2",
+          "spark.driver.extraClassPath": "/opt/airflow/jars/*",
+          "spark.executor.extraClassPath": "/opt/spark/jars/*",
+          "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+          "spark.sql.catalogImplementation": "hive",
+          "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.metastore.svc.cluster.local:9083",
+          "spark.sql.warehouse.dir": "s3a://warehouse/",
+          "spark.hadoop.fs.s3a.endpoint": "http://minio-svc-private.storage.svc.cluster.local:9000",
+          "spark.hadoop.fs.s3a.access.key": "minioadmin1",
+          "spark.hadoop.fs.s3a.secret.key": "minioadmin1",
+          "spark.hadoop.fs.s3a.path.style.access": "true",
+          "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+          "spark.sql.sources.partitionOverwriteMode": "dynamic",
+          "spark.eventLog.enabled": "true",
+          "spark.eventLog.dir": "s3a://spark-logs/events",
+          "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
+          "spark.openlineage.namespace": "onprem-spark",
+          "spark.openlineage.transport.type": "kafka",
+          "spark.openlineage.transport.topicName": "openlineage.events",
+          "spark.openlineage.transport.properties.key.serializer": "org.apache.kafka.common.serialization.StringSerializer",
+          "spark.openlineage.transport.properties.value.serializer": "org.apache.kafka.common.serialization.StringSerializer",
+          "spark.openlineage.transport.properties.bootstrap.servers": "kafka-broker-0.kafka-broker.streaming.svc.cluster.local:9092",
+          "spark.openlineage.debugFacet": "enabled",
+          "app.job_asset_bucket": "asset",
+          "app.job_input_path": "job-input/tc3.json"
+        }
+      },
+      "downstream": []
+    }
+  ]
+}
