@@ -1,0 +1,62 @@
+{
+  "run_mode": {
+    "name": "default"
+  },
+  "extract": {
+    "orders": {
+      "reader": "JDBCReader",
+      "url": "jdbc:postgresql://postgresdb.streaming.svc.cluster.local:5432/superstore",
+      "table": "public.orders",
+      "properties": {
+        "user": "postgres",
+        "password": "postgres",
+        "driver": "org.postgresql.Driver"
+      }
+    }
+  },
+  "transform": {
+    "transformer": "ConfigTransformer",
+    "transformation": {
+      "orders": [
+        {
+          "op": "withColumnRenamed",
+          "args": {
+            "existing": "orderid",
+            "new": "order_id"
+          }
+        },
+        {
+          "op": "withColumnRenamed",
+          "args": {
+            "existing": "date_",
+            "new": "order_date"
+          }
+        },
+        {
+          "op": "withColumnRenamed",
+          "args": {
+            "existing": "userid",
+            "new": "user_id"
+          }
+        },
+        {
+          "op": "withColumnRenamed",
+          "args": {
+            "existing": "totalbasket",
+            "new": "total_basket"
+          }
+        }
+      ]
+    }
+  },
+  "load": {
+    "orders": {
+      "writer": "DeltaWriter",
+      "mode": "overwrite",
+      "table_name": "spark_catalog.bronze.test_orders_simple",
+      "path": "s3a://warehouse/bronze_superstore/test_orders_simple",
+      "partition_by": [],
+      "first": true
+    }
+  }
+}
