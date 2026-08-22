@@ -1,0 +1,33 @@
+{
+  "run_mode": {
+    "name": "default"
+  },
+  "extract": {
+    "product_category_name_translation": {
+      "reader": "JDBCReader",
+      "url": "jdbc:postgresql://postgresdb.streaming.svc.cluster.local:5432/demo",
+      "table": "public.product_category_name_translation",
+      "properties": {
+        "user": "postgres",
+        "password": "postgres",
+        "driver": "org.postgresql.Driver"
+      }
+    }
+  },
+  "transform": {
+    "transformer": "ConfigTransformer",
+    "transformation": {
+      "product_category_name_translation": []
+    }
+  },
+  "load": {
+    "product_category_name_translation": {
+      "writer": "DeltaWriter",
+      "mode": "overwrite",
+      "table_name": "spark_catalog.bronze.olist_product_category_name_translation",
+      "path": "s3a://warehouse/bronze_superstore/olist_product_category_name_translation",
+      "partition_by": [],
+      "first": true
+    }
+  }
+}

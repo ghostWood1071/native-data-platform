@@ -1,0 +1,33 @@
+{
+  "run_mode": {
+    "name": "default"
+  },
+  "extract": {
+    "order_payments": {
+      "reader": "JDBCReader",
+      "url": "jdbc:postgresql://postgresdb.streaming.svc.cluster.local:5432/demo",
+      "table": "public.order_payments",
+      "properties": {
+        "user": "postgres",
+        "password": "postgres",
+        "driver": "org.postgresql.Driver"
+      }
+    }
+  },
+  "transform": {
+    "transformer": "ConfigTransformer",
+    "transformation": {
+      "order_payments": []
+    }
+  },
+  "load": {
+    "order_payments": {
+      "writer": "DeltaWriter",
+      "mode": "overwrite",
+      "table_name": "spark_catalog.bronze.olist_order_payments",
+      "path": "s3a://warehouse/bronze_superstore/olist_order_payments",
+      "partition_by": [],
+      "first": true
+    }
+  }
+}

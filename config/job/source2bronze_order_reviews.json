@@ -1,0 +1,33 @@
+{
+  "run_mode": {
+    "name": "default"
+  },
+  "extract": {
+    "order_reviews": {
+      "reader": "JDBCReader",
+      "url": "jdbc:postgresql://postgresdb.streaming.svc.cluster.local:5432/demo",
+      "table": "public.order_reviews",
+      "properties": {
+        "user": "postgres",
+        "password": "postgres",
+        "driver": "org.postgresql.Driver"
+      }
+    }
+  },
+  "transform": {
+    "transformer": "ConfigTransformer",
+    "transformation": {
+      "order_reviews": []
+    }
+  },
+  "load": {
+    "order_reviews": {
+      "writer": "DeltaWriter",
+      "mode": "overwrite",
+      "table_name": "spark_catalog.bronze.olist_order_reviews",
+      "path": "s3a://warehouse/bronze_superstore/olist_order_reviews",
+      "partition_by": [],
+      "first": true
+    }
+  }
+}
