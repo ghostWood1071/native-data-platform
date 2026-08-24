@@ -1,9 +1,9 @@
 {
-  "dag_id": "source2bronze_products",
-  "description": "Approved execution workflow for pipeline source2bronze_products",
+  "dag_id": "tc",
+  "description": "Approved execution workflow for pipeline tc",
   "owner": "data_team",
   "email": [],
-  "timezone": "Asia/Ho_Chi_Minh",
+  "timezone": "Asia/Singapore",
   "start_date": "2025-01-01T00:00:00+00:00",
   "schedule": "0 2 * * *",
   "catchup": false,
@@ -19,19 +19,19 @@
   ],
   "tasks": [
     {
-      "task_id": "source2bronze_products",
+      "task_id": "tc",
       "operator": "SparkSubmitOperator",
       "module": "airflow.providers.apache.spark.operators.spark_submit",
       "params": {
         "application": "s3a://asset/spark-jobs/entry_point.py",
         "conn_id": "spark_k8s",
-        "name": "source2bronze_products",
+        "name": "tc",
         "deploy_mode": "cluster",
         "application_args": [
           "--job_asset_bucket",
           "asset",
           "--job_input_path",
-          "job-input/source2bronze_products.json",
+          "job-input/tc.json",
           "--minio_endpoint",
           "minio-svc-private.storage.svc.cluster.local:9000",
           "--minio_user",
@@ -67,7 +67,7 @@
           "spark.openlineage.transport.properties.bootstrap.servers": "kafka-broker-0.kafka-broker.streaming.svc.cluster.local:9092",
           "spark.openlineage.debugFacet": "enabled",
           "app.job_asset_bucket": "asset",
-          "app.job_input_path": "job-input/source2bronze_products.json"
+          "app.job_input_path": "job-input/tc.json"
         }
       },
       "downstream": []

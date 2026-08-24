@@ -1,0 +1,41 @@
+{
+  "run_mode": {
+    "name": "default"
+  },
+  "extract": {
+    "customers": {
+      "reader": "JDBCReader",
+      "url": "jdbc:postgresql://postgresdb.streaming.svc.cluster.local:5432/superstore",
+      "table": "public.customers",
+      "properties": {
+        "user": "postgres",
+        "password": "postgres",
+        "driver": "org.postgresql.Driver"
+      }
+    },
+    "orders": {
+      "reader": "JDBCReader",
+      "url": "jdbc:postgresql://postgresdb.streaming.svc.cluster.local:5432/superstore",
+      "table": "public.orders",
+      "properties": {
+        "user": "postgres",
+        "password": "postgres",
+        "driver": "org.postgresql.Driver"
+      }
+    }
+  },
+  "transform": {
+    "transformer": "SQLTransformer",
+    "transformation": "tc.sql"
+  },
+  "load": {
+    "result": {
+      "writer": "DeltaWriter",
+      "mode": "overwrite",
+      "table_name": "spark_catalog.bronze.test_region_revenue",
+      "path": "s3a://warehouse/bronze_superstore/test_region_revenue",
+      "partition_by": [],
+      "first": true
+    }
+  }
+}

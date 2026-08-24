@@ -1,6 +1,6 @@
 {
-  "dag_id": "source2bronze_products",
-  "description": "Approved execution workflow for pipeline source2bronze_products",
+  "dag_id": "source2bronze_streaming_postgresql_demo_public_orders",
+  "description": "Approved execution workflow for pipeline source2bronze_streaming-postgresql.demo.public.orders",
   "owner": "data_team",
   "email": [],
   "timezone": "Asia/Ho_Chi_Minh",
@@ -19,19 +19,19 @@
   ],
   "tasks": [
     {
-      "task_id": "source2bronze_products",
+      "task_id": "source2bronze_streaming_postgresql_demo_public_orders",
       "operator": "SparkSubmitOperator",
       "module": "airflow.providers.apache.spark.operators.spark_submit",
       "params": {
         "application": "s3a://asset/spark-jobs/entry_point.py",
         "conn_id": "spark_k8s",
-        "name": "source2bronze_products",
+        "name": "source2bronze_streaming_postgresql_demo_public_orders",
         "deploy_mode": "cluster",
         "application_args": [
           "--job_asset_bucket",
           "asset",
           "--job_input_path",
-          "job-input/source2bronze_products.json",
+          "job-input/source2bronze_streaming_postgresql_demo_public_orders.json",
           "--minio_endpoint",
           "minio-svc-private.storage.svc.cluster.local:9000",
           "--minio_user",
@@ -67,7 +67,7 @@
           "spark.openlineage.transport.properties.bootstrap.servers": "kafka-broker-0.kafka-broker.streaming.svc.cluster.local:9092",
           "spark.openlineage.debugFacet": "enabled",
           "app.job_asset_bucket": "asset",
-          "app.job_input_path": "job-input/source2bronze_products.json"
+          "app.job_input_path": "job-input/source2bronze_streaming_postgresql_demo_public_orders.json"
         }
       },
       "downstream": []
