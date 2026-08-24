@@ -1,0 +1,33 @@
+{
+  "run_mode": {
+    "name": "default"
+  },
+  "extract": {
+    "products": {
+      "reader": "JDBCReader",
+      "url": "jdbc:postgresql://postgresdb.streaming.svc.cluster.local:5432/demo",
+      "table": "public.products",
+      "properties": {
+        "user": "postgres",
+        "password": "postgres",
+        "driver": "org.postgresql.Driver"
+      }
+    }
+  },
+  "transform": {
+    "transformer": "ConfigTransformer",
+    "transformation": {
+      "products": []
+    }
+  },
+  "load": {
+    "products": {
+      "writer": "DeltaWriter",
+      "mode": "overwrite",
+      "table_name": "spark_catalog.bronze.olist_products",
+      "path": "s3a://warehouse/bronze_superstore/olist_products",
+      "partition_by": [],
+      "first": true
+    }
+  }
+}
