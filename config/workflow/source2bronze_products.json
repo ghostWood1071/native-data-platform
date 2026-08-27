@@ -3,7 +3,7 @@
   "description": "Approved execution workflow for pipeline source2bronze_products",
   "owner": "data_team",
   "email": [],
-  "timezone": "Asia/Ho_Chi_Minh",
+  "timezone": "Asia/Bangkok",
   "start_date": "2025-01-01T00:00:00+00:00",
   "schedule": "0 2 * * *",
   "catchup": false,
@@ -66,6 +66,8 @@
           "spark.openlineage.transport.properties.value.serializer": "org.apache.kafka.common.serialization.StringSerializer",
           "spark.openlineage.transport.properties.bootstrap.servers": "kafka-broker-0.kafka-broker.streaming.svc.cluster.local:9092",
           "spark.openlineage.debugFacet": "enabled",
+          "spark.app.name": "source2bronze_products",
+          "spark.openlineage.appName": "source2bronze_products",
           "app.job_asset_bucket": "asset",
           "app.job_input_path": "job-input/source2bronze_products.json"
         }
