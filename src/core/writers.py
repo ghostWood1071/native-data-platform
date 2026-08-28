@@ -48,74 +48,31 @@ class IcebergWriter(BaseWriter):
         df.writeTo(table_name).partitionedBy(*partition_cols).append()
 
 class DeltaWriter(BaseWriter):  
-    def overwrite_partition(self, df: DataFrame):
+    def _write_table(self, df: DataFrame, mode: str):
         fqn_table_name = self.config.get("table_name") #catalog.database.table
-        table_name = fqn_table_name.split(".")[2]
-        db_name = fqn_table_name.split(".")[1]
+        table_name = fqn_table_name.rsplit(".", 1)[-1]
+        db_name = fqn_table_name.rsplit(".", 2)[-2]
         partition_cols = self.config.get("partition_by", [])
+        path = self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}")
         self.spark.sql(f"CREATE DATABASE IF NOT EXISTS {db_name}")
-        first = self.config.get("first", False)
+        if mode == "overwrite" and self.config.get("first", False):
+            self.spark.sql(f"DROP TABLE IF EXISTS {fqn_table_name}")
         (
             df.write.format("delta")
-                            .mode("overwrite")
+                            .mode(mode)
                             .partitionBy(*partition_cols)
-                            .option("path", self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}"))
-                            .save()
+                            .option("path", path)
+                            .saveAsTable(fqn_table_name)
         )
-        if first:
-            self.spark.sql(f"DROP TABLE IF EXISTS {db_name}.{table_name}")
-            self.spark.sql(f"""
-                CREATE TABLE IF NOT EXISTS {db_name}.{table_name}
-                USING delta
-                LOCATION '{self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}")}'
-            """)
+
+    def overwrite_partition(self, df: DataFrame):
+        self._write_table(df, "overwrite")
 
     def overwrite(self, df: DataFrame):
-        fqn_table_name = self.config.get("table_name") #catalog.database.table
-        table_name = fqn_table_name.split(".")[2]
-        db_name = fqn_table_name.split(".")[1]
-        partition_cols = self.config.get("partition_by", [])
-        self.spark.sql(f"CREATE DATABASE IF NOT EXISTS {db_name}")
-        first = self.config.get("first", False)
-        (
-            df.write.format("delta")
-                            .mode("overwrite")
-                            .partitionBy(*partition_cols)
-                            .option("path", self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}"))
-                            .save()
-        )
-        if first:
-            self.spark.sql(f"DROP TABLE IF EXISTS {db_name}.{table_name}")
-            self.spark.sql(f"""
-                CREATE TABLE IF NOT EXISTS {db_name}.{table_name}
-                USING delta
-                LOCATION '{self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}")}'
-            """)
-        
-
+        self._write_table(df, "overwrite")
 
     def append(self, df: DataFrame):
-        fqn_table_name = self.config.get("table_name") #catalog.database.table
-        table_name = fqn_table_name.split(".")[2]
-        db_name = fqn_table_name.split(".")[1]
-        partition_cols = self.config.get("partition_by", [])
-        first = self.config.get("first", False)
-        self.spark.sql(f"CREATE DATABASE IF NOT EXISTS {db_name}")
-        (
-            df.write.format("delta")
-                            .mode("append")
-                            .partitionBy(*partition_cols)
-                            .option("path", self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}"))
-                            .save()
-        )
-        if first:
-            self.spark.sql(f"DROP TABLE IF EXISTS {db_name}.{table_name}")
-            self.spark.sql(f"""
-                CREATE TABLE IF NOT EXISTS {db_name}.{table_name}
-                USING delta
-                LOCATION '{self.config.get("path", f"s3a://warehouse/{db_name}/{table_name}")}'
-            """)
-        
+        self._write_table(df, "append")
 
     def upsert(self, df: DataFrame):
         table_name = self.config.get("table_name")
