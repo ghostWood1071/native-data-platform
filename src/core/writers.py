@@ -114,13 +114,22 @@ class DeltaWriter(BaseWriter):
         return table_name
 
     def _write(self, df, mode):
-        self._ensure_table(
-            df, recreate=self.config.get("first", False)
-        )
+        table_name, database_name, path = self._table_details()
+        first = self.config.get("first", False)
+
+        if mode == "overwrite" and first:
+            # Let saveAsTable create and populate the catalog table as one CTAS
+            # operation. Pre-registering it makes Spark V2 request TRUNCATE,
+            # which Delta does not support for this external table.
+            self.spark.sql(f"CREATE DATABASE IF NOT EXISTS {database_name}")
+            self.spark.sql(f"DROP TABLE IF EXISTS {table_name}")
+        else:
+            self._ensure_table(df, recreate=first)
+
         writer = (
             df.write.format("delta")
             .mode(mode)
-            .option("path", self._table_details()[2])
+            .option("path", path)
         )
         partition_cols = self.config.get("partition_by", [])
         if partition_cols:

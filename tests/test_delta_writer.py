@@ -204,8 +204,17 @@ class DeltaWriterTest(unittest.TestCase):
             statements[1],
             "DROP TABLE IF EXISTS `spark_catalog`.`bronze`.`olist_customers`",
         )
-        self.assertTrue(statements[2].startswith("CREATE TABLE IF NOT EXISTS"))
+        self.assertEqual(len(statements), 2)
         self.assertIn(("saveAsTable", TABLE_NAME), events)
+
+    def test_first_overwrite_does_not_precreate_table_before_save_as_table(self):
+        writer, dataframe, events = make_writer(first=True, existing_delta=True)
+
+        writer.overwrite(dataframe)
+
+        statements = sql_events(events)
+        self.assertFalse(any(statement.startswith("CREATE TABLE") for statement in statements))
+        self.assertEqual(events[-1], ("saveAsTable", TABLE_NAME))
 
     def test_save_as_table_failure_is_propagated(self):
         writer, dataframe, _ = make_writer(fail_write=True)
