@@ -59,10 +59,6 @@ class RecordingDataFrameWriter:
         self.events = events
         self.fail_write = fail_write
 
-    def format(self, value):
-        self.events.append(("format", value))
-        return self
-
     def mode(self, value):
         self.events.append(("mode", value))
         return self
@@ -75,8 +71,8 @@ class RecordingDataFrameWriter:
         self.events.append(("partitionBy", columns))
         return self
 
-    def saveAsTable(self, table_name):
-        self.events.append(("saveAsTable", table_name))
+    def insertInto(self, table_name, overwrite=None):
+        self.events.append(("insertInto", table_name, overwrite))
         if self.fail_write:
             raise RuntimeError("write failed")
 
@@ -148,15 +144,13 @@ class DeltaWriterTest(unittest.TestCase):
         self.assertIn("(`customer_id` string, `customer name` string)", create_table)
         self.assertIn(f"LOCATION '{TABLE_PATH}'", create_table)
 
-    def test_overwrite_uses_save_as_catalog_table(self):
+    def test_overwrite_uses_insert_into_catalog_table(self):
         writer, dataframe, events = make_writer()
 
         writer.overwrite(dataframe)
 
-        self.assertIn(("format", "delta"), events)
         self.assertIn(("mode", "overwrite"), events)
-        self.assertIn(("option", "path", TABLE_PATH), events)
-        self.assertIn(("saveAsTable", TABLE_NAME), events)
+        self.assertIn(("insertInto", TABLE_NAME, True), events)
 
     def test_configured_path_is_preserved_in_external_table(self):
         writer, dataframe, events = make_writer()
@@ -167,14 +161,14 @@ class DeltaWriterTest(unittest.TestCase):
         self.assertIn("USING DELTA", create_table)
         self.assertIn(f"LOCATION '{TABLE_PATH}'", create_table)
 
-    def test_append_uses_save_as_table_and_preserves_first_registration(self):
+    def test_append_uses_insert_into_and_preserves_first_registration(self):
         writer, dataframe, events = make_writer(first=True)
 
         writer.append(dataframe)
 
         statements = sql_events(events)
         self.assertIn(("mode", "append"), events)
-        self.assertIn(("saveAsTable", TABLE_NAME), events)
+        self.assertIn(("insertInto", TABLE_NAME, False), events)
         self.assertEqual(
             statements[1],
             "DROP TABLE IF EXISTS `spark_catalog`.`bronze`.`olist_customers`",
@@ -192,9 +186,8 @@ class DeltaWriterTest(unittest.TestCase):
 
         create_table = sql_events(events)[1]
         self.assertIn("PARTITIONED BY (`event_date`, `region`)", create_table)
-        self.assertIn(("partitionBy", ("event_date", "region")), events)
 
-    def test_first_recreates_registration_before_save_as_table(self):
+    def test_first_recreates_registration_before_insert_into(self):
         writer, dataframe, events = make_writer(first=True)
 
         writer.overwrite(dataframe)
@@ -204,19 +197,10 @@ class DeltaWriterTest(unittest.TestCase):
             statements[1],
             "DROP TABLE IF EXISTS `spark_catalog`.`bronze`.`olist_customers`",
         )
-        self.assertEqual(len(statements), 2)
-        self.assertIn(("saveAsTable", TABLE_NAME), events)
+        self.assertTrue(statements[2].startswith("CREATE TABLE IF NOT EXISTS"))
+        self.assertIn(("insertInto", TABLE_NAME, True), events)
 
-    def test_first_overwrite_does_not_precreate_table_before_save_as_table(self):
-        writer, dataframe, events = make_writer(first=True, existing_delta=True)
-
-        writer.overwrite(dataframe)
-
-        statements = sql_events(events)
-        self.assertFalse(any(statement.startswith("CREATE TABLE") for statement in statements))
-        self.assertEqual(events[-1], ("saveAsTable", TABLE_NAME))
-
-    def test_save_as_table_failure_is_propagated(self):
+    def test_insert_into_failure_is_propagated(self):
         writer, dataframe, _ = make_writer(fail_write=True)
 
         with self.assertRaisesRegex(RuntimeError, "write failed"):

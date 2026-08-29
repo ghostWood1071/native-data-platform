@@ -51,8 +51,8 @@ class DeltaWriter(BaseWriter):
     """Write through the catalog table so Spark can report end-to-end lineage.
 
     A path-based ``DataFrameWriter.save`` does not identify the logical output
-    table.  ``saveAsTable`` keeps the source DataFrame plan and targets the fully
-    qualified catalog table in the same write operation.
+    table. ``insertInto`` keeps the source DataFrame plan and targets the fully
+    qualified, pre-registered catalog table in the same write operation.
     """
 
     @staticmethod
@@ -114,27 +114,15 @@ class DeltaWriter(BaseWriter):
         return table_name
 
     def _write(self, df, mode):
-        table_name, database_name, path = self._table_details()
-        first = self.config.get("first", False)
-
-        if mode == "overwrite" and first:
-            # Let saveAsTable create and populate the catalog table as one CTAS
-            # operation. Pre-registering it makes Spark V2 request TRUNCATE,
-            # which Delta does not support for this external table.
-            self.spark.sql(f"CREATE DATABASE IF NOT EXISTS {database_name}")
-            self.spark.sql(f"DROP TABLE IF EXISTS {table_name}")
-        else:
-            self._ensure_table(df, recreate=first)
-
-        writer = (
-            df.write.format("delta")
-            .mode(mode)
-            .option("path", path)
+        self._ensure_table(
+            df, recreate=self.config.get("first", False)
         )
-        partition_cols = self.config.get("partition_by", [])
-        if partition_cols:
-            writer = writer.partitionBy(*partition_cols)
-        writer.saveAsTable(self.config["table_name"])
+        (
+            df.write.mode(mode)
+            .insertInto(
+                self.config["table_name"], overwrite=(mode == "overwrite")
+            )
+        )
 
     def overwrite_partition(self, df: DataFrame):
         self._write(df, mode="overwrite")
