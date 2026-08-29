@@ -150,6 +150,9 @@ class DeltaWriterTest(unittest.TestCase):
         writer.overwrite(dataframe)
 
         self.assertIn(("mode", "overwrite"), events)
+        self.assertIn(
+            ("option", "partitionOverwriteMode", "static"), events
+        )
         self.assertIn(("insertInto", TABLE_NAME, True), events)
 
     def test_configured_path_is_preserved_in_external_table(self):
@@ -186,6 +189,9 @@ class DeltaWriterTest(unittest.TestCase):
 
         create_table = sql_events(events)[1]
         self.assertIn("PARTITIONED BY (`event_date`, `region`)", create_table)
+        self.assertNotIn(
+            ("option", "partitionOverwriteMode", "static"), events
+        )
 
     def test_first_recreates_registration_before_insert_into(self):
         writer, dataframe, events = make_writer(first=True)

@@ -113,22 +113,26 @@ class DeltaWriter(BaseWriter):
         )
         return table_name
 
-    def _write(self, df, mode):
+    def _write(self, df, mode, partition_overwrite_mode=None):
         self._ensure_table(
             df, recreate=self.config.get("first", False)
         )
-        (
-            df.write.mode(mode)
-            .insertInto(
-                self.config["table_name"], overwrite=(mode == "overwrite")
+        writer = df.write.mode(mode)
+        if partition_overwrite_mode:
+            writer = writer.option(
+                "partitionOverwriteMode", partition_overwrite_mode
             )
+        writer.insertInto(
+            self.config["table_name"], overwrite=(mode == "overwrite")
         )
 
     def overwrite_partition(self, df: DataFrame):
         self._write(df, mode="overwrite")
 
     def overwrite(self, df: DataFrame):
-        self._write(df, mode="overwrite")
+        self._write(
+            df, mode="overwrite", partition_overwrite_mode="static"
+        )
 
     def append(self, df: DataFrame):
         self._write(df, mode="append")
