@@ -119,14 +119,18 @@ class DeltaWriterTest(unittest.TestCase):
         self.assertIn("USING DELTA", create_table)
         self.assertIn(f"LOCATION '{TABLE_PATH}'", create_table)
 
-    def test_append_uses_insert_into_without_drop(self):
+    def test_append_uses_insert_into_and_preserves_first_registration(self):
         writer, dataframe, events = make_writer(first=True)
 
         writer.append(dataframe)
 
         statements = sql_events(events)
         self.assertTrue(statements[-1].startswith("INSERT INTO TABLE"))
-        self.assertFalse(any("DROP TABLE" in statement for statement in statements))
+        self.assertEqual(
+            statements[1],
+            "DROP TABLE IF EXISTS `spark_catalog`.`bronze`.`olist_customers`",
+        )
+        self.assertTrue(statements[2].startswith("CREATE TABLE IF NOT EXISTS"))
 
     def test_partition_configuration_is_used_when_creating_table(self):
         writer, _, events = make_writer(partition_by=["event_date", "region"])
