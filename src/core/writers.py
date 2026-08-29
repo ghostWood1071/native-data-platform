@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 from pyspark.sql import DataFrame
 from src.core.interfaces import BaseWriter
 
@@ -52,10 +50,9 @@ class IcebergWriter(BaseWriter):
 class DeltaWriter(BaseWriter):
     """Write through the catalog table so Spark can report end-to-end lineage.
 
-    A path-based ``DataFrameWriter.save`` exposes only the physical Delta path to
-    OpenLineage.  Keeping the source DataFrame in a temporary view and executing
-    one INSERT query gives Spark a single logical plan containing both the JDBC
-    input and the Hive/Delta output, including the column projections.
+    A path-based ``DataFrameWriter.save`` does not identify the logical output
+    table.  ``saveAsTable`` keeps the source DataFrame plan and targets the fully
+    qualified catalog table in the same write operation.
     """
 
     @staticmethod
@@ -116,33 +113,28 @@ class DeltaWriter(BaseWriter):
         )
         return table_name
 
-    def _insert(self, df, overwrite):
-        table_name = self._ensure_table(
+    def _write(self, df, mode):
+        self._ensure_table(
             df, recreate=self.config.get("first", False)
         )
-        temp_view = f"_delta_writer_{uuid4().hex}"
-        quoted_columns = ", ".join(
-            self._quote_identifier(column) for column in df.columns
+        writer = (
+            df.write.format("delta")
+            .mode(mode)
+            .option("path", self._table_details()[2])
         )
-        command = "INSERT OVERWRITE TABLE" if overwrite else "INSERT INTO TABLE"
-
-        df.createOrReplaceTempView(temp_view)
-        try:
-            self.spark.sql(
-                f"{command} {table_name} ({quoted_columns}) "
-                f"SELECT {quoted_columns} FROM {self._quote_identifier(temp_view)}"
-            )
-        finally:
-            self.spark.catalog.dropTempView(temp_view)
+        partition_cols = self.config.get("partition_by", [])
+        if partition_cols:
+            writer = writer.partitionBy(*partition_cols)
+        writer.saveAsTable(self.config["table_name"])
 
     def overwrite_partition(self, df: DataFrame):
-        self._insert(df, overwrite=True)
+        self._write(df, mode="overwrite")
 
     def overwrite(self, df: DataFrame):
-        self._insert(df, overwrite=True)
+        self._write(df, mode="overwrite")
 
     def append(self, df: DataFrame):
-        self._insert(df, overwrite=False)
+        self._write(df, mode="append")
         
 
     def upsert(self, df: DataFrame):

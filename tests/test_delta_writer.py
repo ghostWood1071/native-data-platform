@@ -1,4 +1,3 @@
-import re
 import sys
 import types
 import unittest
@@ -39,8 +38,9 @@ class FakeSchema:
 
 
 class RecordingDataFrame:
-    def __init__(self, events, columns=None):
+    def __init__(self, events, columns=None, fail_write=False):
         self.events = events
+        self.fail_write = fail_write
         self.columns = columns or ["customer_id", "customer name"]
         self.schema = FakeSchema(
             [FakeField(column, "string") for column in self.columns]
@@ -48,6 +48,37 @@ class RecordingDataFrame:
 
     def createOrReplaceTempView(self, view_name):
         self.events.append(("createTempView", view_name))
+
+    @property
+    def write(self):
+        return RecordingDataFrameWriter(self.events, self.fail_write)
+
+
+class RecordingDataFrameWriter:
+    def __init__(self, events, fail_write=False):
+        self.events = events
+        self.fail_write = fail_write
+
+    def format(self, value):
+        self.events.append(("format", value))
+        return self
+
+    def mode(self, value):
+        self.events.append(("mode", value))
+        return self
+
+    def option(self, key, value):
+        self.events.append(("option", key, value))
+        return self
+
+    def partitionBy(self, *columns):
+        self.events.append(("partitionBy", columns))
+        return self
+
+    def saveAsTable(self, table_name):
+        self.events.append(("saveAsTable", table_name))
+        if self.fail_write:
+            raise RuntimeError("write failed")
 
 
 class RecordingCatalog:
@@ -71,7 +102,7 @@ class RecordingSpark:
             raise RuntimeError("insert failed")
 
 
-def make_writer(fail_insert=False, existing_delta=False, **overrides):
+def make_writer(fail_write=False, existing_delta=False, **overrides):
     config = {
         "table_name": TABLE_NAME,
         "path": TABLE_PATH,
@@ -80,9 +111,9 @@ def make_writer(fail_insert=False, existing_delta=False, **overrides):
     }
     config.update(overrides)
     events = []
-    dataframe = RecordingDataFrame(events)
+    dataframe = RecordingDataFrame(events, fail_write=fail_write)
     writer = DeltaWriter(
-        RecordingSpark(events, fail_insert=fail_insert),
+        RecordingSpark(events),
         config,
         "2026-08-27",
     )
@@ -117,21 +148,15 @@ class DeltaWriterTest(unittest.TestCase):
         self.assertIn("(`customer_id` string, `customer name` string)", create_table)
         self.assertIn(f"LOCATION '{TABLE_PATH}'", create_table)
 
-    def test_overwrite_uses_insert_overwrite_with_logical_table(self):
+    def test_overwrite_uses_save_as_catalog_table(self):
         writer, dataframe, events = make_writer()
 
         writer.overwrite(dataframe)
 
-        insert = sql_events(events)[-1]
-        self.assertIn(
-            "INSERT OVERWRITE TABLE `spark_catalog`.`bronze`.`olist_customers`",
-            insert,
-        )
-        self.assertIn(
-            "(`customer_id`, `customer name`) SELECT `customer_id`, `customer name`",
-            insert,
-        )
-        self.assertNotIn("saveAsTable", str(events))
+        self.assertIn(("format", "delta"), events)
+        self.assertIn(("mode", "overwrite"), events)
+        self.assertIn(("option", "path", TABLE_PATH), events)
+        self.assertIn(("saveAsTable", TABLE_NAME), events)
 
     def test_configured_path_is_preserved_in_external_table(self):
         writer, dataframe, events = make_writer()
@@ -142,13 +167,14 @@ class DeltaWriterTest(unittest.TestCase):
         self.assertIn("USING DELTA", create_table)
         self.assertIn(f"LOCATION '{TABLE_PATH}'", create_table)
 
-    def test_append_uses_insert_into_and_preserves_first_registration(self):
+    def test_append_uses_save_as_table_and_preserves_first_registration(self):
         writer, dataframe, events = make_writer(first=True)
 
         writer.append(dataframe)
 
         statements = sql_events(events)
-        self.assertTrue(statements[-1].startswith("INSERT INTO TABLE"))
+        self.assertIn(("mode", "append"), events)
+        self.assertIn(("saveAsTable", TABLE_NAME), events)
         self.assertEqual(
             statements[1],
             "DROP TABLE IF EXISTS `spark_catalog`.`bronze`.`olist_customers`",
@@ -166,8 +192,9 @@ class DeltaWriterTest(unittest.TestCase):
 
         create_table = sql_events(events)[1]
         self.assertIn("PARTITIONED BY (`event_date`, `region`)", create_table)
+        self.assertIn(("partitionBy", ("event_date", "region")), events)
 
-    def test_first_recreates_registration_before_insert_overwrite(self):
+    def test_first_recreates_registration_before_save_as_table(self):
         writer, dataframe, events = make_writer(first=True)
 
         writer.overwrite(dataframe)
@@ -178,34 +205,13 @@ class DeltaWriterTest(unittest.TestCase):
             "DROP TABLE IF EXISTS `spark_catalog`.`bronze`.`olist_customers`",
         )
         self.assertTrue(statements[2].startswith("CREATE TABLE IF NOT EXISTS"))
-        self.assertTrue(statements[3].startswith("INSERT OVERWRITE TABLE"))
+        self.assertIn(("saveAsTable", TABLE_NAME), events)
 
-    def test_repeated_execution_uses_unique_safe_temp_views(self):
-        writer, first_dataframe, events = make_writer(first=False)
-        second_dataframe = RecordingDataFrame(events)
+    def test_save_as_table_failure_is_propagated(self):
+        writer, dataframe, _ = make_writer(fail_write=True)
 
-        writer.overwrite(first_dataframe)
-        writer.overwrite(second_dataframe)
-
-        views = [event[1] for event in events if event[0] == "createTempView"]
-        self.assertEqual(len(views), 2)
-        self.assertNotEqual(views[0], views[1])
-        self.assertTrue(
-            all(re.fullmatch(r"_delta_writer_[0-9a-f]{32}", view) for view in views)
-        )
-        dropped = [event[1] for event in events if event[0] == "dropTempView"]
-        self.assertEqual(dropped, views)
-
-    def test_temp_view_is_dropped_when_insert_fails(self):
-        writer, dataframe, events = make_writer(fail_insert=True)
-
-        with self.assertRaisesRegex(RuntimeError, "insert failed"):
+        with self.assertRaisesRegex(RuntimeError, "write failed"):
             writer.overwrite(dataframe)
-
-        created_view = next(
-            event[1] for event in events if event[0] == "createTempView"
-        )
-        self.assertIn(("dropTempView", created_view), events)
 
 
 if __name__ == "__main__":
