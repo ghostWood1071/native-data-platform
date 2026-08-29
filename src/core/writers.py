@@ -62,6 +62,15 @@ class DeltaWriter(BaseWriter):
     def _quote_identifier(identifier):
         return f"`{identifier.replace('`', '``')}`"
 
+    @staticmethod
+    def _quote_string(value):
+        return value.replace("'", "''")
+
+    def _is_delta_table(self, path):
+        return self.spark._jvm.io.delta.tables.DeltaTable.isDeltaTable(
+            self.spark._jsparkSession, path
+        )
+
     def _table_details(self):
         parts = self.config["table_name"].split(".")
         if len(parts) != 3 or any(not part for part in parts):
@@ -71,7 +80,7 @@ class DeltaWriter(BaseWriter):
         table_name = ".".join(quoted_parts)
         database_name = ".".join(quoted_parts[:2])
         default_path = f"s3a://warehouse/{parts[1]}/{parts[2]}"
-        path = self.config.get("path", default_path).replace("'", "''")
+        path = self.config.get("path", default_path)
         return table_name, database_name, path
 
     def _ensure_table(self, df, recreate):
@@ -80,6 +89,14 @@ class DeltaWriter(BaseWriter):
 
         if recreate and self.config.get("first", False):
             self.spark.sql(f"DROP TABLE IF EXISTS {table_name}")
+
+        quoted_path = self._quote_string(path)
+        if self._is_delta_table(path):
+            self.spark.sql(
+                f"CREATE TABLE IF NOT EXISTS {table_name} "
+                f"USING DELTA LOCATION '{quoted_path}'"
+            )
+            return table_name
 
         columns = ", ".join(
             f"{self._quote_identifier(field.name)} {field.dataType.simpleString()}"
@@ -95,7 +112,7 @@ class DeltaWriter(BaseWriter):
 
         self.spark.sql(
             f"CREATE TABLE IF NOT EXISTS {table_name} ({columns}) "
-            f"USING DELTA{partition_clause} LOCATION '{path}'"
+            f"USING DELTA{partition_clause} LOCATION '{quoted_path}'"
         )
         return table_name
 

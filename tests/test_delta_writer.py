@@ -71,7 +71,7 @@ class RecordingSpark:
             raise RuntimeError("insert failed")
 
 
-def make_writer(fail_insert=False, **overrides):
+def make_writer(fail_insert=False, existing_delta=False, **overrides):
     config = {
         "table_name": TABLE_NAME,
         "path": TABLE_PATH,
@@ -86,6 +86,7 @@ def make_writer(fail_insert=False, **overrides):
         config,
         "2026-08-27",
     )
+    writer._is_delta_table = lambda path: existing_delta
     return writer, dataframe, events
 
 
@@ -94,6 +95,28 @@ def sql_events(events):
 
 
 class DeltaWriterTest(unittest.TestCase):
+    def test_existing_delta_path_is_registered_without_explicit_schema(self):
+        writer, dataframe, events = make_writer(existing_delta=True)
+
+        writer.overwrite(dataframe)
+
+        create_table = sql_events(events)[1]
+        self.assertEqual(
+            create_table,
+            "CREATE TABLE IF NOT EXISTS "
+            "`spark_catalog`.`bronze`.`olist_customers` "
+            f"USING DELTA LOCATION '{TABLE_PATH}'",
+        )
+
+    def test_new_delta_path_is_registered_with_dataframe_schema(self):
+        writer, dataframe, events = make_writer(existing_delta=False)
+
+        writer.overwrite(dataframe)
+
+        create_table = sql_events(events)[1]
+        self.assertIn("(`customer_id` string, `customer name` string)", create_table)
+        self.assertIn(f"LOCATION '{TABLE_PATH}'", create_table)
+
     def test_overwrite_uses_insert_overwrite_with_logical_table(self):
         writer, dataframe, events = make_writer()
 
